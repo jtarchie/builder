@@ -6,6 +6,12 @@ configuration. I don't want to maintain anymore YAML files.
 ## Usage
 
 - Download the binary from Releases.
+
+```bash
+brew tap jtarchie/builder https://github.com/jtarchie/builder
+brew install builder
+```
+
 - Create a project with the following directory layout:
 
   - `layout.html` the template to be used to render the content of the site.
