@@ -3,10 +3,12 @@ package main
 import (
 	"bytes"
 	"fmt"
+	htmlTemplate "html/template"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+	textTemplate "text/template"
 
 	"github.com/alecthomas/kong"
 	"github.com/bmatcuk/doublestar/v4"
@@ -21,6 +23,24 @@ import (
 	"go.uber.org/zap"
 )
 
+func html(filename string) (*htmlTemplate.Template, error) {
+	t, err := htmlTemplate.ParseFiles(filename)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse HTML template (%s): %w", filename, err)
+	}
+
+	return t, nil
+}
+
+func text(filename string) (*textTemplate.Template, error) {
+	t, err := textTemplate.ParseFiles(filename)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse text template (%s): %w", filename, err)
+	}
+
+	return t, nil
+}
+
 type CLI struct {
 	SourcePath     string `help:"source of all files" required:"" type:"path"`
 	BuildPath      string `help:"where generated content should go" required:"" type:"path"`
@@ -32,6 +52,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 	logger.Info("removing",
 		zap.String("build_path", c.BuildPath),
 	)
+
 	err := os.RemoveAll(c.BuildPath)
 	if err != nil {
 		return fmt.Errorf("could not remove build path (%s): %w", c.BuildPath, err)
@@ -40,6 +61,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 	logger.Info("removing",
 		zap.String("build_path", c.BuildPath),
 	)
+
 	err = os.MkdirAll(c.BuildPath, 0777)
 	if err != nil {
 		return fmt.Errorf("could not create build path (%s): %w", c.BuildPath, err)
@@ -60,6 +82,12 @@ func (c *CLI) Run(logger *zap.Logger) error {
 
 	// go through each markdown
 	{
+		layoutPath := filepath.Join(c.SourcePath, c.LayoutFilename)
+		layout, err := html(layoutPath)
+		if err != nil {
+			return fmt.Errorf("could not get layout (%s): %w", layoutPath, err)
+		}
+
 		logger := logger.Named("markdown")
 		pattern := filepath.Join(c.SourcePath, "**", "*.md")
 
@@ -74,9 +102,9 @@ func (c *CLI) Run(logger *zap.Logger) error {
 
 		converter := goldmark.New(
 			goldmark.WithExtensions(
+				&frontmatter.Extender{},
 				extension.GFM,
 				emoji.Emoji,
-				&frontmatter.Extender{},
 				&mermaid.Extender{},
 				highlighting.Highlighting,
 			),
@@ -91,9 +119,9 @@ func (c *CLI) Run(logger *zap.Logger) error {
 				zap.String("file", markdownPath),
 			)
 
-			contents, err := os.ReadFile(markdownPath)
+			markdown, err := text(markdownPath)
 			if err != nil {
-				return fmt.Errorf("could not read file (%s): %w", markdownPath, err)
+				return fmt.Errorf("could not get (%s): %w", layoutPath, err)
 			}
 
 			newPath := strings.Replace(
@@ -121,8 +149,15 @@ func (c *CLI) Run(logger *zap.Logger) error {
 				return fmt.Errorf("could not create dir (%s): %w", newDir, err)
 			}
 
-			buffer := &bytes.Buffer{}
-			err = converter.Convert(contents, buffer)
+			evaluated, rendered := &bytes.Buffer{}, &bytes.Buffer{}
+			err = markdown.Execute(evaluated, "test")
+			if err != nil {
+				return fmt.Errorf("could note render (%s): %w", markdownPath, err)
+			}
+
+			ctx := parser.NewContext()
+
+			err = converter.Convert(evaluated.Bytes(), rendered, parser.WithContext(ctx))
 			if err != nil {
 				return fmt.Errorf("could not convert file (%s): %w", newPath, err)
 			}
@@ -131,6 +166,25 @@ func (c *CLI) Run(logger *zap.Logger) error {
 			file, err := os.Create(newPath)
 			if err != nil {
 				return fmt.Errorf("could not create file (%s): %w", newPath, err)
+			}
+
+			d := frontmatter.Get(ctx)
+			if d == nil {
+				return fmt.Errorf("could not get front matter (%s)", markdownPath)
+			}
+
+			meta := map[string]string{}
+			if err := d.Decode(&meta); err != nil {
+				return fmt.Errorf("could not decode front matter (%s): %w", markdownPath, err)
+			}
+
+			err = layout.Execute(file, map[string]any{
+				"Title":       meta["title"],
+				"Description": meta["description"],
+				"Page":        htmlTemplate.HTML(rendered.String()),
+			})
+			if err != nil {
+				return fmt.Errorf("could not write file (%s): %w", newPath, err)
 			}
 
 			err = file.Close()

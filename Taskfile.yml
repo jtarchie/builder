@@ -6,9 +6,12 @@ tasks:
     cmds:
     - gofmt -w .
   lint: golangci-lint run --fix --timeout "10m"
-  test: go test -race ./...
+  test: |
+    go test -race ./...
+    go run main.go --source-path example/ --build-path ./build
   default:
     cmds:
     - task: format
+    - task: lint
     - task: build
     - task: test
