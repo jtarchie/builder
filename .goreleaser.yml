@@ -1,4 +1,10 @@
 project_name: builder
+
+release:
+  github:
+    owner: jtarchie
+    name: builder
+
 builds:
   - goos:
       - linux
@@ -7,3 +13,18 @@ builds:
     goarch:
       - amd64
       - arm64
+
+brews:
+- tap:
+    owner: jtarchie
+    name: builder
+  ids:
+  - homebrew
+  test: |
+    system "#{bin}/om --help"
+  install:
+    bin.install "builder"
+checksum:
+  name_template: 'checksums.txt'
+changelog:
+  skip: true
