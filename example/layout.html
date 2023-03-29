@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="description" content="An example site.">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.classless.min.css">
+        <title><%= title || "jtarchie.com" %></title>
+        <style>
+            @media print {
+                nav {
+                    display: none;
+                }
+            }
+            nav {
+                padding-left: var(--spacing);
+                padding-right: var(--spacing);
+            }
+        </style>
+    </head>
+    <body>
+    <nav>
+        <ul>
+            <li><a href="/"><span>Example site</span></a></li>
+        </ul>
+        <ul>
+            <li><a href="/posts" class="pseudo button">Blog</a></li>
+        </ul>
+    </nav>
+    <main class="content">
+        <%= content %>
+    </main>
+    </body>
+</html>
