@@ -6,13 +6,33 @@ release:
     name: builder
 
 builds:
-  - goos:
-      - linux
-      - windows
-      - darwin
-    goarch:
-      - amd64
-      - arm64
+- env:
+    - CGO_ENABLED=0
+  goos:
+    - linux
+    - darwin
+    - windows
+  goarch:
+    - "386"
+    - amd64
+    - arm
+    - arm64
+    - ppc64
+  goarm:
+    - "7"
+  ignore:
+    - goos: windows
+      goarch: arm
+  mod_timestamp: '{{ .CommitTimestamp }}'
+  flags:
+    - -trimpath
+  ldflags:
+    - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{ .CommitDate }} -X main.builtBy=goreleaser
+
+universal_binaries:
+- replace: false
+
+
 
 brews:
 - tap:
@@ -21,7 +41,7 @@ brews:
   ids:
   - homebrew
   test: |
-    system "#{bin}/om --help"
+    system "#{bin}/builder --help"
   install:
     bin.install "builder"
 checksum:
