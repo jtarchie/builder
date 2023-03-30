@@ -18,12 +18,13 @@ import (
 	highlighting "github.com/yuin/goldmark-highlighting"
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
+	"github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/frontmatter"
 	"go.abhg.dev/goldmark/mermaid"
 	"go.uber.org/zap"
 )
 
-func html(filename string) (*htmlTemplate.Template, error) {
+func htmlRender(filename string) (*htmlTemplate.Template, error) {
 	t, err := htmlTemplate.ParseFiles(filename)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse HTML template (%s): %w", filename, err)
@@ -32,7 +33,7 @@ func html(filename string) (*htmlTemplate.Template, error) {
 	return t, nil
 }
 
-func text(filename string) (*textTemplate.Template, error) {
+func textRender(filename string) (*textTemplate.Template, error) {
 	t, err := textTemplate.ParseFiles(filename)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse text template (%s): %w", filename, err)
@@ -83,7 +84,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 	// go through each markdown
 	{
 		layoutPath := filepath.Join(c.SourcePath, c.LayoutFilename)
-		layout, err := html(layoutPath)
+		layout, err := htmlRender(layoutPath)
 		if err != nil {
 			return fmt.Errorf("could not get layout (%s): %w", layoutPath, err)
 		}
@@ -101,6 +102,10 @@ func (c *CLI) Run(logger *zap.Logger) error {
 		}
 
 		converter := goldmark.New(
+			goldmark.WithRendererOptions(
+				html.WithXHTML(),
+				html.WithUnsafe(),
+			),
 			goldmark.WithExtensions(
 				&frontmatter.Extender{},
 				extension.GFM,
@@ -110,6 +115,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 			),
 			goldmark.WithParserOptions(
 				parser.WithAutoHeadingID(),
+				parser.WithAttribute(),
 			),
 		)
 
@@ -119,7 +125,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 				zap.String("file", markdownPath),
 			)
 
-			markdown, err := text(markdownPath)
+			markdown, err := textRender(markdownPath)
 			if err != nil {
 				return fmt.Errorf("could not get (%s): %w", layoutPath, err)
 			}
