@@ -1,18 +1,14 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
-	fm "github.com/adrg/frontmatter"
 	"github.com/alecthomas/kong"
 	"github.com/bmatcuk/doublestar/v4"
 	cp "github.com/otiai10/copy"
-	"github.com/samber/lo"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting"
@@ -44,65 +40,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 	}
 
 	// go through each markdown
-	templateLogger := logger.Named("template.func")
-
-	templates := templates{
-		FuncMap: map[string]any{
-			"iterDocs": func(path string, limit int) []Doc {
-				pattern := filepath.Join(c.SourcePath, path, "**", "*.md")
-
-				matches, err := doublestar.FilepathGlob(pattern)
-				if err != nil {
-					templateLogger.Fatal("glob",
-						zap.String("pattern", pattern),
-						zap.Error(err),
-					)
-				}
-
-				matches = lo.Filter(matches, func(path string, _ int) bool {
-					return !strings.HasSuffix(path, "index.md")
-				})
-
-				var docs []Doc
-				if len(matches) > limit {
-					matches = matches[:limit]
-				}
-
-				for _, match := range matches {
-					contents, err := os.ReadFile(match)
-					if err != nil {
-						templateLogger.Fatal("read",
-							zap.String("match", match),
-							zap.Error(err),
-						)
-					}
-					metadata := map[string]string{}
-
-					_, err = fm.Parse(bytes.NewReader(contents), &metadata)
-					if err != nil {
-						templateLogger.Fatal("metadata",
-							zap.String("match", match),
-							zap.Error(err),
-						)
-					}
-
-					docs = append(docs, Doc{
-						Title: metadata["title"],
-						Path: strings.Replace(
-							strings.Replace(match, c.SourcePath, "", 1),
-							".md",
-							".html",
-							1,
-						),
-						BaseName: filepath.Base(match),
-					})
-				}
-
-				return docs
-			},
-		},
-	}
-
+	templates := NewTemplates(logger, c.SourcePath)
 	layoutPath := filepath.Join(c.SourcePath, c.LayoutFilename)
 
 	layout, err := templates.html(layoutPath)

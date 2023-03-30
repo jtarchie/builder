@@ -38,7 +38,7 @@ func NewMarkdownDoc(
 func (m *markdownDoc) Write(
 	layout *htmlTemplate.Template,
 	converter goldmark.Markdown,
-	templates templates,
+	templates *templates,
 ) error {
 	template, err := templates.text(m.filename)
 	if err != nil {
