@@ -105,13 +105,10 @@ func NewTemplates(
 
 					docs = append(docs, Doc{
 						Title: metadata["title"],
-						Path: strings.Replace(
+						Path: changeExtension(
 							strings.Replace(match, sourcePath, "", 1),
-							".md",
-							".html",
-							1,
 						),
-						BaseName: filepath.Base(match),
+						BaseName: changeExtension(filepath.Base(match)),
 					})
 				}
 
@@ -119,4 +116,8 @@ func NewTemplates(
 			},
 		},
 	}
+}
+
+func changeExtension(filename string) string {
+	return strings.Replace(filename, ".md", ".html", 1)
 }
