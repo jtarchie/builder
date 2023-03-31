@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-type TemplateDoc struct {
+type ViewDoc struct {
 	*Doc
 	sourcePath string
 }
 
-func (d *TemplateDoc) Path() string {
+func (d *ViewDoc) Path() string {
 	path := strings.Replace(
 		d.filename,
 		d.sourcePath,
@@ -26,7 +26,7 @@ func (d *TemplateDoc) Path() string {
 	)
 }
 
-func (d *TemplateDoc) Basename() string {
+func (d *ViewDoc) Basename() string {
 	basename := filepath.Base(d.Path())
 
 	return strings.Replace(
@@ -36,5 +36,3 @@ func (d *TemplateDoc) Basename() string {
 		1,
 	)
 }
-
-type TemplateDocs []TemplateDoc

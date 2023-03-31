@@ -2,8 +2,8 @@ package builder
 
 import (
 	"fmt"
-	"regexp"
 	"sort"
+	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/samber/lo"
@@ -11,18 +11,25 @@ import (
 
 type Docs []*Doc
 
-func NewDocs(pattern string, ignore *regexp.Regexp) (Docs, error) {
+func NewDocs(
+	pattern string,
+	limit int,
+) (Docs, error) {
 	matches, err := doublestar.FilepathGlob(pattern)
 	if err != nil {
 		return nil, fmt.Errorf("could not matches (%q): %w", pattern, err)
 	}
 
 	matches = lo.Filter(matches, func(match string, _ int) bool {
-		return !ignore.MatchString(match)
+		return !strings.HasPrefix(match, "index.md")
 	})
 
 	sort.Strings(matches)
 	sort.Sort(sort.Reverse(sort.StringSlice(matches)))
+
+	if limit > 0 && len(matches) > limit {
+		matches = matches[:limit]
+	}
 
 	docs := Docs{}
 

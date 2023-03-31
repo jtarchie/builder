@@ -9,7 +9,6 @@ import (
 	"github.com/jtarchie/builder"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"go.uber.org/zap"
 )
 
 func TestBuilder(t *testing.T) {
@@ -22,7 +21,6 @@ var _ = Describe("Builder", func() {
 		sourcePath string
 		buildPath  string
 		cli        *builder.CLI
-		logger     *zap.Logger
 	)
 
 	createFile := func(filename, contents string) {
@@ -67,9 +65,6 @@ var _ = Describe("Builder", func() {
 		buildPath, err = os.MkdirTemp("", "")
 		Expect(err).NotTo(HaveOccurred())
 
-		logger, err = zap.NewDevelopment()
-		Expect(err).NotTo(HaveOccurred())
-
 		cli = &builder.CLI{
 			SourcePath:     sourcePath,
 			BuildPath:      buildPath,
@@ -85,7 +80,7 @@ var _ = Describe("Builder", func() {
 		})
 
 		It("renders all files successfully", func() {
-			err := cli.Run(logger)
+			err := cli.Run()
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
@@ -104,7 +99,7 @@ var _ = Describe("Builder", func() {
 		})
 
 		It("renders a title and description", func() {
-			err := cli.Run(logger)
+			err := cli.Run()
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
@@ -118,7 +113,7 @@ var _ = Describe("Builder", func() {
 			createLayout()
 			createFile("index.md", "some text")
 
-			err := cli.Run(logger)
+			err := cli.Run()
 			Expect(err).To(HaveOccurred())
 		})
 
@@ -126,7 +121,7 @@ var _ = Describe("Builder", func() {
 			createLayout()
 			createFile("index.md", "# some title")
 
-			err := cli.Run(logger)
+			err := cli.Run()
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
@@ -164,7 +159,7 @@ title: required
 		})
 
 		It("looks for the latest posts within a directory", func() {
-			err := cli.Run(logger)
+			err := cli.Run()
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
@@ -189,7 +184,7 @@ title: required
 
 	When("no layout exists", func() {
 		It("fails with an error", func() {
-			err := cli.Run(logger)
+			err := cli.Run()
 			Expect(err).To(HaveOccurred())
 		})
 	})
@@ -205,7 +200,7 @@ title: required
 				LayoutFilename: "layout.html",
 			}
 
-			err = cli.Run(logger)
+			err = cli.Run()
 			Expect(err).NotTo(HaveOccurred())
 
 			contents, err := os.ReadFile(filepath.Join(buildPath, "markdown.html"))
