@@ -140,6 +140,8 @@ var _ = Describe("Builder", func() {
 				)
 			}
 
+			createFile("posts/index.md", `# IGNORE ME`)
+
 			createFile("index.md", `
 ---
 title: required
@@ -163,6 +165,7 @@ title: required
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
+			Expect(contents).ToNot(ContainSubstring(`IGNORE ME`))
 			Expect(contents).To(ContainSubstring(`<a href="/posts/10.html">some 10 title</a> 10`))
 			Expect(contents).To(ContainSubstring(`<a href="/posts/09.html">some 9 title</a>`))
 			Expect(contents).To(ContainSubstring(`<a href="/posts/08.html">some 8 title</a>`))

@@ -31,7 +31,7 @@ func (d *ViewDoc) Basename() string {
 
 	return strings.Replace(
 		basename,
-		".md",
+		".html",
 		"",
 		1,
 	)

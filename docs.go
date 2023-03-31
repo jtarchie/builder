@@ -21,7 +21,7 @@ func NewDocs(
 	}
 
 	matches = lo.Filter(matches, func(match string, _ int) bool {
-		return !strings.HasPrefix(match, "index.md")
+		return !strings.HasSuffix(match, "index.md")
 	})
 
 	sort.Strings(matches)
