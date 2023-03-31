@@ -152,6 +152,13 @@ var _ = Describe("Builder", func() {
 * [{{$doc.Title}}]({{$doc.Path}})
 {{end}}
 			`)
+			createFile("index-all.md", `
+---
+---
+{{range $doc := iterDocs "posts/" 0}}
+* [{{$doc.Title}}]({{$doc.Path}})
+{{end}}
+			`)
 		})
 
 		It("looks for the latest posts within a directory", func() {
@@ -163,6 +170,18 @@ var _ = Describe("Builder", func() {
 			Expect(contents).To(ContainSubstring(`<a href="/posts/09.html">some 9 title</a>`))
 			Expect(contents).To(ContainSubstring(`<a href="/posts/08.html">some 8 title</a>`))
 			Expect(contents).NotTo(ContainSubstring(`<a href="/posts/07.html">some 7 title</a>`))
+
+			contents = readFile("index-all.html")
+			Expect(contents).To(ContainSubstring(`<a href="/posts/10.html">some 10 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/09.html">some 9 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/08.html">some 8 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/07.html">some 7 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/06.html">some 6 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/05.html">some 5 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/04.html">some 4 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/03.html">some 3 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/02.html">some 2 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/01.html">some 1 title</a>`))
 		})
 	})
 

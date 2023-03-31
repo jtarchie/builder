@@ -81,7 +81,7 @@ func NewTemplates(
 				sort.Sort(sort.Reverse(sort.StringSlice(matches)))
 
 				var docs []Doc
-				if len(matches) > limit {
+				if len(matches) > limit && limit > 0 {
 					matches = matches[:limit]
 				}
 
