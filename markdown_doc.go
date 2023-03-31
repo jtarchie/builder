@@ -6,6 +6,7 @@ import (
 	htmlTemplate "html/template"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/yuin/goldmark"
@@ -39,6 +40,8 @@ func NewMarkdownDoc(
 		logger:    logger,
 	}
 }
+
+var titleFromHeader = regexp.MustCompile(`(?m)^#\s+(.*)$`)
 
 func (m *markdownDoc) Write(
 	layout *htmlTemplate.Template,
@@ -89,15 +92,21 @@ func (m *markdownDoc) Write(
 		return fmt.Errorf("could not create file (%s): %w", newPath, err)
 	}
 
-	d := frontmatter.Get(ctx)
-	if d == nil {
-		return fmt.Errorf("frontmatter required (%s)", m.filename)
-	}
-
 	meta := &metadataPayload{}
+	d := frontmatter.Get(ctx)
 
-	if err := d.Decode(meta); err != nil {
-		return fmt.Errorf("could not decode front matter (%s): %w", m.filename, err)
+	switch {
+	case d == nil:
+		matches := titleFromHeader.FindAllStringSubmatch(evaluated.String(), 1)
+		if len(matches) == 0 {
+			return fmt.Errorf("frontmatter required with (%s)", m.filename)
+		}
+
+		meta.Title = matches[0][1]
+	default:
+		if err := d.Decode(meta); err != nil {
+			return fmt.Errorf("could not decode front matter (%s): %w", m.filename, err)
+		}
 	}
 
 	err = layout.Execute(file, map[string]any{

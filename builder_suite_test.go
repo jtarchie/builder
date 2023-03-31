@@ -113,6 +113,27 @@ var _ = Describe("Builder", func() {
 		})
 	})
 
+	When("rendering documents without frontmatter", func() {
+		It("errors on no title", func() {
+			createLayout()
+			createFile("index.md", "some text")
+
+			err := cli.Run(logger)
+			Expect(err).To(HaveOccurred())
+		})
+
+		It("uses H1 for the title", func() {
+			createLayout()
+			createFile("index.md", "# some title")
+
+			err := cli.Run(logger)
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := readFile("index.html")
+			Expect(contents).To(ContainSubstring("<title>some title</title>"))
+		})
+	})
+
 	When("rendering a file with template functions", func() {
 		BeforeEach(func() {
 			createLayout()
