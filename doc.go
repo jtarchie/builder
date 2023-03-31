@@ -10,9 +10,9 @@ import (
 )
 
 type Doc struct {
+	contents string
 	filename string
 	metadata *DocMetadata
-	contents string
 }
 
 type DocMetadata struct {
@@ -22,16 +22,18 @@ type DocMetadata struct {
 
 var titleFromHeader = regexp.MustCompile(`(?m)^#\s+(.*)$`)
 
-func NewDoc(filename string) (*Doc, error) {
+func NewDoc(
+	filename string,
+) (*Doc, error) {
 	metadata, contents, err := parseDoc(filename)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse doc (%s): %w", filename, err)
 	}
 
 	return &Doc{
+		contents: contents,
 		filename: filename,
 		metadata: metadata,
-		contents: contents,
 	}, nil
 }
 

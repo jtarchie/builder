@@ -1,26 +1,13 @@
 package builder
 
 import (
-	"bytes"
 	"fmt"
 	htmlTemplate "html/template"
 	"os"
 	"path/filepath"
-	"sort"
-	"strings"
+	"regexp"
 	textTemplate "text/template"
-
-	"github.com/adrg/frontmatter"
-	"github.com/bmatcuk/doublestar/v4"
-	"github.com/samber/lo"
-	"go.uber.org/zap"
 )
-
-type DocPayload struct {
-	Title    string
-	Path     string
-	BaseName string
-}
 
 type templates struct {
 	textTemplate.FuncMap
@@ -50,69 +37,32 @@ func (f *templates) text(doc *Doc) (*textTemplate.Template, error) {
 }
 
 func NewTemplates(
-	logger *zap.Logger,
 	sourcePath string,
 ) *templates {
-	templateLogger := logger.Named("template.func")
-
 	return &templates{
 		FuncMap: map[string]any{
-			"iterDocs": func(path string, limit int) []DocPayload {
+			"iterDocs": func(path string, limit int) (TemplateDocs, error) {
 				pattern := filepath.Join(sourcePath, path, "**", "*.md")
 
-				matches, err := doublestar.FilepathGlob(pattern)
+				docs, err := NewDocs(pattern, regexp.MustCompile(`index\.md`))
 				if err != nil {
-					templateLogger.Fatal("glob",
-						zap.String("pattern", pattern),
-						zap.Error(err),
-					)
+					return nil, fmt.Errorf("could not load docs: %w", err)
 				}
 
-				matches = lo.Filter(matches, func(path string, _ int) bool {
-					return !strings.HasSuffix(path, "index.md")
-				})
-
-				sort.Strings(matches)
-				sort.Sort(sort.Reverse(sort.StringSlice(matches)))
-
-				var docs []DocPayload
-				if len(matches) > limit && limit > 0 {
-					matches = matches[:limit]
+				if len(docs) > limit && limit > 0 {
+					docs = docs[:limit]
 				}
 
-				for _, match := range matches {
-					contents, err := os.ReadFile(match)
-					if err != nil {
-						templateLogger.Fatal("read",
-							zap.String("match", match),
-							zap.Error(err),
-						)
-					}
-					metadata := map[string]string{}
-
-					_, err = frontmatter.Parse(bytes.NewReader(contents), &metadata)
-					if err != nil {
-						templateLogger.Fatal("metadata",
-							zap.String("match", match),
-							zap.Error(err),
-						)
-					}
-
-					docs = append(docs, DocPayload{
-						Title: metadata["title"],
-						Path: changeExtension(
-							strings.Replace(match, sourcePath, "", 1),
-						),
-						BaseName: changeExtension(filepath.Base(match)),
+				templateDocs := TemplateDocs{}
+				for _, doc := range docs {
+					templateDocs = append(templateDocs, TemplateDoc{
+						Doc:        doc,
+						sourcePath: sourcePath,
 					})
 				}
 
-				return docs
+				return templateDocs, nil
 			},
 		},
 	}
-}
-
-func changeExtension(filename string) string {
-	return strings.Replace(filename, ".md", ".html", 1)
 }

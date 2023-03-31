@@ -37,7 +37,7 @@ func (c *CLI) Run(logger *zap.Logger) error {
 	}
 
 	// go through each markdown
-	templates := NewTemplates(logger, c.SourcePath)
+	templates := NewTemplates(c.SourcePath)
 	layoutPath := filepath.Join(c.SourcePath, c.LayoutFilename)
 
 	layout, err := templates.html(layoutPath)

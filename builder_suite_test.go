@@ -150,7 +150,7 @@ var _ = Describe("Builder", func() {
 title: required
 ---
 {{range $doc := iterDocs "posts/" 3}}
-* [{{$doc.Title}}]({{$doc.Path}})
+* [{{$doc.Title}}]({{$doc.Path}}) {{$doc.Basename}}
 {{end}}
 			`)
 			createFile("index-all.md", `
@@ -168,7 +168,7 @@ title: required
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Expect(contents).To(ContainSubstring(`<a href="/posts/10.html">some 10 title</a>`))
+			Expect(contents).To(ContainSubstring(`<a href="/posts/10.html">some 10 title</a> 10`))
 			Expect(contents).To(ContainSubstring(`<a href="/posts/09.html">some 9 title</a>`))
 			Expect(contents).To(ContainSubstring(`<a href="/posts/08.html">some 8 title</a>`))
 			Expect(contents).NotTo(ContainSubstring(`<a href="/posts/07.html">some 7 title</a>`))
