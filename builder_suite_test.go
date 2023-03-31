@@ -80,7 +80,7 @@ var _ = Describe("Builder", func() {
 	When("a layout and assets directory exists", func() {
 		BeforeEach(func() {
 			createLayout()
-			createFile("index.md", "---\n---\nsome text")
+			createFile("index.md", "---\ntitle: required\n---\nsome text")
 			createFile("public/404.html", "404 page")
 		})
 
@@ -90,7 +90,7 @@ var _ = Describe("Builder", func() {
 
 			contents := readFile("index.html")
 			Expect(contents).To(ContainSubstring("some text"))
-			Expect(contents).To(ContainSubstring("<title></title>"))
+			Expect(contents).To(ContainSubstring("<title>required</title>"))
 
 			contents = readFile("404.html")
 			Expect(contents).To(ContainSubstring("404 page"))
@@ -147,6 +147,7 @@ var _ = Describe("Builder", func() {
 
 			createFile("index.md", `
 ---
+title: required
 ---
 {{range $doc := iterDocs "posts/" 3}}
 * [{{$doc.Title}}]({{$doc.Path}})
@@ -154,6 +155,7 @@ var _ = Describe("Builder", func() {
 			`)
 			createFile("index-all.md", `
 ---
+title: required
 ---
 {{range $doc := iterDocs "posts/" 0}}
 * [{{$doc.Title}}]({{$doc.Path}})

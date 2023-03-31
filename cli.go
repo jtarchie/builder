@@ -13,7 +13,6 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
-	"go.abhg.dev/goldmark/frontmatter"
 	"go.abhg.dev/goldmark/mermaid"
 	"go.uber.org/zap"
 )
@@ -64,7 +63,6 @@ func (c *CLI) Run(logger *zap.Logger) error {
 			html.WithUnsafe(),
 		),
 		goldmark.WithExtensions(
-			&frontmatter.Extender{},
 			extension.GFM,
 			emoji.Emoji,
 			&mermaid.Extender{},

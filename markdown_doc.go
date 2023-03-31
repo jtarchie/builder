@@ -6,12 +6,9 @@ import (
 	htmlTemplate "html/template"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/parser"
-	"go.abhg.dev/goldmark/frontmatter"
 	"go.uber.org/zap"
 )
 
@@ -20,11 +17,6 @@ type markdownDoc struct {
 	sourceDir string
 	buildDir  string
 	logger    *zap.Logger
-}
-
-type metadataPayload struct {
-	Title       string `yaml:"title"`
-	Description string `yaml:"description"`
 }
 
 func NewMarkdownDoc(
@@ -41,16 +33,19 @@ func NewMarkdownDoc(
 	}
 }
 
-var titleFromHeader = regexp.MustCompile(`(?m)^#\s+(.*)$`)
-
 func (m *markdownDoc) Write(
 	layout *htmlTemplate.Template,
 	converter goldmark.Markdown,
 	templates *templates,
 ) error {
-	template, err := templates.text(m.filename)
+	doc, err := NewDoc(m.filename)
 	if err != nil {
-		return fmt.Errorf("could not get template: %w", err)
+		return fmt.Errorf("could not get markdown file (%s): %w", m.filename, err)
+	}
+
+	template, err := templates.text(doc)
+	if err != nil {
+		return fmt.Errorf("could not init template: %w", err)
 	}
 
 	newPath := strings.Replace(
@@ -61,12 +56,6 @@ func (m *markdownDoc) Write(
 	)
 	newPath = strings.Replace(newPath, ".md", ".html", 1)
 	newDir := filepath.Dir(newPath)
-
-	m.logger.Info("create-dir",
-		zap.String("file", m.filename),
-		zap.String("new-file", newPath),
-		zap.String("new-dir", newDir),
-	)
 
 	err = os.MkdirAll(newDir, 0777)
 	if err != nil {
@@ -80,9 +69,7 @@ func (m *markdownDoc) Write(
 		return fmt.Errorf("could not render (%s): %w", m.filename, err)
 	}
 
-	ctx := parser.NewContext()
-
-	err = converter.Convert(evaluated.Bytes(), rendered, parser.WithContext(ctx))
+	err = converter.Convert(evaluated.Bytes(), rendered)
 	if err != nil {
 		return fmt.Errorf("could not convert file (%s): %w", newPath, err)
 	}
@@ -92,26 +79,13 @@ func (m *markdownDoc) Write(
 		return fmt.Errorf("could not create file (%s): %w", newPath, err)
 	}
 
-	meta := &metadataPayload{}
-	d := frontmatter.Get(ctx)
-
-	switch {
-	case d == nil:
-		matches := titleFromHeader.FindAllStringSubmatch(evaluated.String(), 1)
-		if len(matches) == 0 {
-			return fmt.Errorf("frontmatter required with (%s)", m.filename)
-		}
-
-		meta.Title = matches[0][1]
-	default:
-		if err := d.Decode(meta); err != nil {
-			return fmt.Errorf("could not decode front matter (%s): %w", m.filename, err)
-		}
+	if doc.Title() == "" {
+		return fmt.Errorf("document has no title (%s)", m.filename)
 	}
 
 	err = layout.Execute(file, map[string]any{
-		"Title":       meta.Title,
-		"Description": meta.Description,
+		"Title":       doc.Title(),
+		"Description": doc.Description(),
 		"Page":        htmlTemplate.HTML(rendered.String()),
 	})
 
