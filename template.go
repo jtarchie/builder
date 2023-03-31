@@ -1,4 +1,4 @@
-package main
+package builder
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	htmlTemplate "html/template"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	textTemplate "text/template"
 
@@ -75,6 +76,9 @@ func NewTemplates(
 				matches = lo.Filter(matches, func(path string, _ int) bool {
 					return !strings.HasSuffix(path, "index.md")
 				})
+
+				sort.Strings(matches)
+				sort.Sort(sort.Reverse(sort.StringSlice(matches)))
 
 				var docs []Doc
 				if len(matches) > limit {

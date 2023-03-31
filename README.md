@@ -10,6 +10,7 @@ configuration. I don't want to maintain anymore YAML files.
 ```bash
 brew tap jtarchie/builder https://github.com/jtarchie/builder
 brew install builder
+npm install -g @mermaid-js/mermaid-cli # for server side mermaid
 ```
 
 - Create a project with the following directory layout:

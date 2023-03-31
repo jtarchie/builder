@@ -1,4 +1,4 @@
-package main
+package builder
 
 import (
 	"bytes"
@@ -19,6 +19,11 @@ type markdownDoc struct {
 	sourceDir string
 	buildDir  string
 	logger    *zap.Logger
+}
+
+type metadataPayload struct {
+	Title       string `yaml:"title"`
+	Description string `yaml:"description"`
 }
 
 func NewMarkdownDoc(
@@ -84,22 +89,20 @@ func (m *markdownDoc) Write(
 		return fmt.Errorf("could not create file (%s): %w", newPath, err)
 	}
 
-	meta := map[string]string{}
-
 	d := frontmatter.Get(ctx)
 	if d == nil {
-		m.logger.Error("frontmatter.invalid",
-			zap.String("file", m.filename),
-		)
-	} else {
-		if err := d.Decode(&meta); err != nil {
-			return fmt.Errorf("could not decode front matter (%s): %w", m.filename, err)
-		}
+		return fmt.Errorf("frontmatter required (%s)", m.filename)
+	}
+
+	meta := &metadataPayload{}
+
+	if err := d.Decode(meta); err != nil {
+		return fmt.Errorf("could not decode front matter (%s): %w", m.filename, err)
 	}
 
 	err = layout.Execute(file, map[string]any{
-		"Title":       meta["title"],
-		"Description": meta["description"],
+		"Title":       meta.Title,
+		"Description": meta.Description,
 		"Page":        htmlTemplate.HTML(rendered.String()),
 	})
 

@@ -2,12 +2,10 @@ version: '3'
 
 tasks:
   build: go build ./...
-  format:
-    cmds:
-    - gofmt -w .
+  format: gofmt -w .
   lint: golangci-lint run --fix --timeout "10m"
   test: |
-    go test -race ./...
+    go test -cover -race ./...
     go run ./... --source-path example/ --build-path ./build
   default:
     cmds:

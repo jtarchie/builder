@@ -1,12 +1,10 @@
-package main
+package builder
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 
-	"github.com/alecthomas/kong"
 	"github.com/bmatcuk/doublestar/v4"
 	cp "github.com/otiai10/copy"
 	"github.com/yuin/goldmark"
@@ -71,6 +69,9 @@ func (c *CLI) Run(logger *zap.Logger) error {
 			emoji.Emoji,
 			&mermaid.Extender{},
 			highlighting.Highlighting,
+			extension.DefinitionList,
+			extension.Footnote,
+			extension.Typographer,
 		),
 		goldmark.WithParserOptions(
 			parser.WithAutoHeadingID(),
@@ -113,7 +114,7 @@ func (c *CLI) assetSetup(logger *zap.Logger) error {
 		zap.String("assets_path", assetsPath),
 	)
 
-	if _, err := os.Stat("/path/to/whatever"); !os.IsNotExist(err) {
+	if _, err := os.Stat(assetsPath); !os.IsNotExist(err) {
 		err = cp.Copy(assetsPath, c.BuildPath)
 		if err != nil {
 			return fmt.Errorf("could not copy assets contents (%s): %w", assetsPath, err)
@@ -148,17 +149,4 @@ func (c *CLI) buildSetup(logger *zap.Logger) error {
 	}
 
 	return nil
-}
-
-func main() {
-	logger, err := zap.NewProduction()
-	if err != nil {
-		log.Fatalf("could not start logger: %s", err)
-	}
-
-	cli := &CLI{}
-	ctx := kong.Parse(cli)
-	// Call the Run() method of the selected parsed command.
-	err = ctx.Run(logger)
-	ctx.FatalIfErrorf(err)
 }
