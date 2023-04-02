@@ -192,6 +192,20 @@ title: required
 		})
 	})
 
+	When("using Github emojis", func() {
+		It("renders it", func() {
+			createLayout()
+			createFile("index.md", "---\ntitle: required\n---\n:running:")
+
+			err := cli.Run()
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := readFile("index.html")
+			Expect(contents).NotTo(ContainSubstring(`running`))
+			Expect(contents).To(ContainSubstring(`&#x1f3c3;`))
+		})
+	})
+
 	When("using the example", func() {
 		It("is successful", func() {
 			examplePath, err := filepath.Abs(filepath.Join(".", "example"))

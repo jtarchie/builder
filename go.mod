@@ -11,7 +11,7 @@ require (
 	github.com/otiai10/copy v1.9.0
 	github.com/samber/lo v1.38.1
 	github.com/yuin/goldmark v1.5.4
-	github.com/yuin/goldmark-emoji v1.0.1
+	github.com/yuin/goldmark-emoji v1.0.2-0.20210607094911-0487583eca38
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	go.abhg.dev/goldmark/mermaid v0.4.0
 )
