@@ -32,9 +32,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
           # Your GoReleaser Pro key, if you are using the 'goreleaser-pro' distribution
           # GORELEASER_KEY: ${{ secrets.GORELEASER_KEY }}
-      - uses: dev-drprasad/delete-older-releases@v0.2.1
-        with:
-          repo: jtarchie/builder # defaults to current repo
-          keep_latest: 2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
