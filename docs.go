@@ -25,7 +25,7 @@ func NewDocs(
 	})
 
 	sort.Strings(matches)
-	sort.Sort(sort.Reverse(sort.StringSlice(matches)))
+	matches = lo.Reverse(matches)
 
 	if limit > 0 && len(matches) > limit {
 		matches = matches[:limit]
