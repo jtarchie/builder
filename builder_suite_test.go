@@ -9,6 +9,7 @@ import (
 	"github.com/jtarchie/builder"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gbytes"
 )
 
 func TestBuilder(t *testing.T) {
@@ -33,13 +34,13 @@ var _ = Describe("Builder", func() {
 		Expect(err).NotTo(HaveOccurred())
 	}
 
-	readFile := func(filename string) string {
+	readFile := func(filename string) *gbytes.Buffer {
 		fullPath := filepath.Join(buildPath, filename)
 
 		contents, err := os.ReadFile(fullPath)
 		Expect(err).NotTo(HaveOccurred())
 
-		return string(contents)
+		return gbytes.BufferWithBytes(contents)
 	}
 
 	createLayout := func() {
@@ -84,11 +85,11 @@ var _ = Describe("Builder", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Expect(contents).To(ContainSubstring("some text"))
-			Expect(contents).To(ContainSubstring("<title>required</title>"))
+			Eventually(contents).Should(gbytes.Say("<title>required</title>"))
+			Eventually(contents).Should(gbytes.Say("some text"))
 
 			contents = readFile("404.html")
-			Expect(contents).To(ContainSubstring("404 page"))
+			Eventually(contents).Should(gbytes.Say("404 page"))
 		})
 	})
 
@@ -103,8 +104,8 @@ var _ = Describe("Builder", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Expect(contents).To(ContainSubstring("<title>Some Title</title>"))
-			Expect(contents).To(ContainSubstring("<description>Some Description</description>"))
+			Eventually(contents).Should(gbytes.Say("<title>Some Title</title>"))
+			Eventually(contents).Should(gbytes.Say("<description>Some Description</description>"))
 		})
 	})
 
@@ -125,7 +126,7 @@ var _ = Describe("Builder", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Expect(contents).To(ContainSubstring("<title>some title</title>"))
+			Eventually(contents).Should(gbytes.Say("<title>some title</title>"))
 		})
 	})
 
@@ -165,23 +166,23 @@ title: required
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Expect(contents).ToNot(ContainSubstring(`IGNORE ME`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/10.html">some 10 title</a> 10`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/09.html">some 9 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/08.html">some 8 title</a>`))
-			Expect(contents).NotTo(ContainSubstring(`<a href="/posts/07.html">some 7 title</a>`))
+			Eventually(contents).ShouldNot(gbytes.Say(`IGNORE ME`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10.html">some 10 title</a> 10`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/09.html">some 9 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/08.html">some 8 title</a>`))
+			Eventually(contents).ShouldNot(gbytes.Say(`<a href="/posts/07.html">some 7 title</a>`))
 
 			contents = readFile("index-all.html")
-			Expect(contents).To(ContainSubstring(`<a href="/posts/10.html">some 10 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/09.html">some 9 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/08.html">some 8 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/07.html">some 7 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/06.html">some 6 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/05.html">some 5 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/04.html">some 4 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/03.html">some 3 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/02.html">some 2 title</a>`))
-			Expect(contents).To(ContainSubstring(`<a href="/posts/01.html">some 1 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10.html">some 10 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/09.html">some 9 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/08.html">some 8 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/07.html">some 7 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/06.html">some 6 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/05.html">some 5 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/04.html">some 4 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/03.html">some 3 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/02.html">some 2 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/01.html">some 1 title</a>`))
 		})
 	})
 
@@ -201,8 +202,8 @@ title: required
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Expect(contents).NotTo(ContainSubstring(`running`))
-			Expect(contents).To(ContainSubstring(`&#x1f3c3;`))
+			Eventually(contents).Should(gbytes.Say(`&#x1f3c3;`))
+			Eventually(contents).ShouldNot(gbytes.Say(`running`))
 		})
 	})
 
@@ -223,7 +224,9 @@ title: required
 			contents, err := os.ReadFile(filepath.Join(buildPath, "markdown.html"))
 			Expect(err).NotTo(HaveOccurred())
 
-			Expect(string(contents)).To(ContainSubstring(`<h2 id="h2-heading">h2 Heading</h2>`))
+			buffer := gbytes.BufferWithBytes(contents)
+
+			Eventually(buffer).Should(gbytes.Say(`<h2 id="h2-heading">h2 Heading</h2>`))
 		})
 	})
 })
