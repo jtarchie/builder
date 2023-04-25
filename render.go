@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
 	"github.com/samber/lo"
 	"github.com/yuin/goldmark"
@@ -138,6 +139,15 @@ func (r *Render) Execute() error {
 		err = writeFile(newFilename, layoutWriter.String())
 		if err != nil {
 			return fmt.Errorf("could write new template (%s): %w", newFilename, err)
+		}
+
+		if !strings.Contains(newFilename, "index.html") {
+			newFilename = strings.Replace(newFilename, ".html", "-"+slug.Make(doc.Title())+".html", 1)
+
+			err = writeFile(newFilename, layoutWriter.String())
+			if err != nil {
+				return fmt.Errorf("could write new template (%s): %w", newFilename, err)
+			}
 		}
 	}
 

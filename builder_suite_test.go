@@ -76,7 +76,8 @@ var _ = Describe("Builder", func() {
 	When("a layout and assets directory exists", func() {
 		BeforeEach(func() {
 			createLayout()
-			createFile("index.md", "---\ntitle: required\n---\nsome text")
+			createFile("index.md", "---\ntitle: Required Title\n---\nsome text")
+			createFile("another.md", "---\ntitle: Some 😂 Title\n---\nsome text")
 			createFile("public/404.html", "404 page")
 		})
 
@@ -85,8 +86,14 @@ var _ = Describe("Builder", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			contents := readFile("index.html")
-			Eventually(contents).Should(gbytes.Say("<title>required</title>"))
+			Eventually(contents).Should(gbytes.Say("<title>Required Title</title>"))
 			Eventually(contents).Should(gbytes.Say("some text"))
+
+			contents = readFile("another.html")
+			Eventually(contents).Should(gbytes.Say("<title>Some 😂 Title</title>"))
+
+			contents = readFile("another-some-title.html")
+			Eventually(contents).Should(gbytes.Say("<title>Some 😂 Title</title>"))
 
 			contents = readFile("404.html")
 			Eventually(contents).Should(gbytes.Say("404 page"))
@@ -137,7 +144,7 @@ var _ = Describe("Builder", func() {
 			for i := 1; i <= 10; i++ {
 				createFile(
 					fmt.Sprintf("posts/%02d.md", i),
-					fmt.Sprintf("---\ntitle: some %d title\n---\nsome text", i),
+					fmt.Sprintf("---\ntitle: some %d 😂 title\n---\nsome text", i),
 				)
 			}
 
@@ -149,6 +156,7 @@ title: required
 ---
 {{range $doc := iterDocs "posts/" 3}}
 * [{{$doc.Title}}]({{$doc.Path}}) {{$doc.Basename}}
+* [{{$doc.Title}}]({{$doc.SlugPath}}) {{$doc.Basename}}
 {{end}}
 			`)
 			createFile("index-all.md", `
@@ -167,22 +175,23 @@ title: required
 
 			contents := readFile("index.html")
 			Eventually(contents).ShouldNot(gbytes.Say(`IGNORE ME`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10.html">some 10 title</a> 10`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/09.html">some 9 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/08.html">some 8 title</a>`))
-			Eventually(contents).ShouldNot(gbytes.Say(`<a href="/posts/07.html">some 7 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10.html">some 10 😂 title</a> 10`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10-some-10-title.html">some 10 😂 title</a> 10`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/09.html">some 9 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/08.html">some 8 😂 title</a>`))
+			Eventually(contents).ShouldNot(gbytes.Say(`<a href="/posts/07.html">some 7 😂 title</a>`))
 
 			contents = readFile("index-all.html")
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10.html">some 10 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/09.html">some 9 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/08.html">some 8 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/07.html">some 7 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/06.html">some 6 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/05.html">some 5 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/04.html">some 4 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/03.html">some 3 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/02.html">some 2 title</a>`))
-			Eventually(contents).Should(gbytes.Say(`<a href="/posts/01.html">some 1 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/10.html">some 10 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/09.html">some 9 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/08.html">some 8 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/07.html">some 7 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/06.html">some 6 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/05.html">some 5 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/04.html">some 4 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/03.html">some 3 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/02.html">some 2 😂 title</a>`))
+			Eventually(contents).Should(gbytes.Say(`<a href="/posts/01.html">some 1 😂 title</a>`))
 		})
 	})
 
