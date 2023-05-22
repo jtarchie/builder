@@ -25,6 +25,7 @@ type Render struct {
 	layoutPath string
 	sourcePath string
 	buildPath  string
+	converter  goldmark.Markdown
 }
 
 func NewRender(
@@ -36,29 +37,32 @@ func NewRender(
 		layoutPath: layoutPath,
 		sourcePath: sourcePath,
 		buildPath:  buildPath,
+		converter: goldmark.New(
+			goldmark.WithRendererOptions(
+				html.WithXHTML(),
+				html.WithUnsafe(),
+			),
+			goldmark.WithExtensions(
+				extension.GFM,
+				emoji.Emoji,
+				&mermaid.Extender{},
+				highlighting.Highlighting,
+				extension.DefinitionList,
+				extension.Footnote,
+				extension.Typographer,
+			),
+			goldmark.WithParserOptions(
+				parser.WithAutoHeadingID(),
+				parser.WithAttribute(),
+			),
+		),
 	}
 }
 
 func (r *Render) Execute() error {
-	// create build directory
-	err := os.RemoveAll(r.buildPath)
+	err := r.copyAssets()
 	if err != nil {
-		return fmt.Errorf("could not remove build path (%s): %w", r.buildPath, err)
-	}
-
-	err = os.MkdirAll(r.buildPath, 0777)
-	if err != nil {
-		return fmt.Errorf("could not create build path (%s): %w", r.buildPath, err)
-	}
-
-	// copy over assets
-	assetsPath := filepath.Join(r.sourcePath, "public")
-
-	if _, err := os.Stat(assetsPath); !os.IsNotExist(err) {
-		err = cp.Copy(assetsPath, r.buildPath)
-		if err != nil {
-			return fmt.Errorf("could not copy assets contents (%s): %w", assetsPath, err)
-		}
+		return fmt.Errorf("copying assets issue: %w", err)
 	}
 
 	// foreach markdown file
@@ -97,57 +101,90 @@ func (r *Render) Execute() error {
 	}
 
 	for _, match := range matches {
-		//   get filename
-		doc, err := NewDoc(match)
+		err := r.renderMarkdown(match, funcMap, layout)
 		if err != nil {
-			return fmt.Errorf("could not read markdown doc (%s): %w", match, err)
+			return fmt.Errorf("rendering template issue: %w", err)
 		}
+	}
 
-		if doc.Title() == "" {
-			return fmt.Errorf("could not determine title (%s)", match)
-		}
+	return nil
+}
 
-		markdown, err := template.New(match).Funcs(funcMap).Parse(doc.Contents())
+func (r *Render) copyAssets() error {
+	err := os.RemoveAll(r.buildPath)
+	if err != nil {
+		return fmt.Errorf("could not remove build path (%s): %w", r.buildPath, err)
+	}
+
+	err = os.MkdirAll(r.buildPath, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("could not create build path (%s): %w", r.buildPath, err)
+	}
+
+	assetsPath := filepath.Join(r.sourcePath, "public")
+
+	if _, err := os.Stat(assetsPath); !os.IsNotExist(err) {
+		err = cp.Copy(assetsPath, r.buildPath)
 		if err != nil {
-			return fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
+			return fmt.Errorf("could not copy assets contents (%s): %w", assetsPath, err)
 		}
+	}
 
-		layoutWriter, markdownWriter, renderedWriter := &bytes.Buffer{}, &bytes.Buffer{}, &bytes.Buffer{}
+	return nil
+}
 
-		err = markdown.Execute(markdownWriter, nil)
-		if err != nil {
-			return fmt.Errorf("could not render markdown template (%s): %w", match, err)
-		}
+func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *template.Template) error {
+	doc, err := NewDoc(match)
+	if err != nil {
+		return fmt.Errorf("could not read markdown doc (%s): %w", match, err)
+	}
 
-		err = converter.Convert(markdownWriter.Bytes(), renderedWriter)
-		if err != nil {
-			return fmt.Errorf("could not convert file (%s): %w", match, err)
-		}
+	if doc.Title() == "" {
+		//nolint:goerr113
+		return fmt.Errorf("could not determine title (%s)", match)
+	}
 
-		err = layout.Execute(layoutWriter, map[string]any{
-			"Title":       doc.Title(),
-			"Description": doc.Description(),
-			"Page":        template.HTML(renderedWriter.String()),
-		})
-		if err != nil {
-			return fmt.Errorf("could not render layout template (%s): %w", match, err)
-		}
+	markdown, err := template.New(match).Funcs(funcMap).Parse(doc.Contents())
+	if err != nil {
+		return fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
+	}
 
-		newFilename := strings.Replace(match, r.sourcePath, r.buildPath, 1)
-		newFilename = strings.Replace(newFilename, ".md", ".html", 1)
+	layoutWriter, markdownWriter, renderedWriter := &bytes.Buffer{}, &bytes.Buffer{}, &bytes.Buffer{}
+
+	err = markdown.Execute(markdownWriter, nil)
+	if err != nil {
+		return fmt.Errorf("could not render markdown template (%s): %w", match, err)
+	}
+
+	err = r.converter.Convert(markdownWriter.Bytes(), renderedWriter)
+	if err != nil {
+		return fmt.Errorf("could not convert file (%s): %w", match, err)
+	}
+
+	err = layout.Execute(layoutWriter, map[string]any{
+		"Title":       doc.Title(),
+		"Description": doc.Description(),
+		//nolint:gosec
+		"Page": template.HTML(renderedWriter.String()),
+	})
+	if err != nil {
+		return fmt.Errorf("could not render layout template (%s): %w", match, err)
+	}
+
+	newFilename := strings.Replace(match, r.sourcePath, r.buildPath, 1)
+	newFilename = strings.Replace(newFilename, ".md", ".html", 1)
+
+	err = writeFile(newFilename, layoutWriter.String())
+	if err != nil {
+		return fmt.Errorf("could write new template (%s): %w", newFilename, err)
+	}
+
+	if !strings.Contains(newFilename, "index.html") {
+		newFilename = strings.Replace(newFilename, ".html", "-"+slug.Make(doc.Title())+".html", 1)
 
 		err = writeFile(newFilename, layoutWriter.String())
 		if err != nil {
 			return fmt.Errorf("could write new template (%s): %w", newFilename, err)
-		}
-
-		if !strings.Contains(newFilename, "index.html") {
-			newFilename = strings.Replace(newFilename, ".html", "-"+slug.Make(doc.Title())+".html", 1)
-
-			err = writeFile(newFilename, layoutWriter.String())
-			if err != nil {
-				return fmt.Errorf("could write new template (%s): %w", newFilename, err)
-			}
 		}
 	}
 
@@ -166,35 +203,15 @@ func readFile(filename string) (string, error) {
 func writeFile(filename, contents string) error {
 	dirPath := filepath.Dir(filename)
 
-	err := os.MkdirAll(dirPath, 0777)
+	err := os.MkdirAll(dirPath, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("could not create path (%s): %w", dirPath, err)
 	}
 
-	err = os.WriteFile(filename, []byte(contents), 0777)
+	err = os.WriteFile(filename, []byte(contents), os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("could not write path (%s): %w", filename, err)
 	}
 
 	return nil
 }
-
-var converter = goldmark.New(
-	goldmark.WithRendererOptions(
-		html.WithXHTML(),
-		html.WithUnsafe(),
-	),
-	goldmark.WithExtensions(
-		extension.GFM,
-		emoji.Emoji,
-		&mermaid.Extender{},
-		highlighting.Highlighting,
-		extension.DefinitionList,
-		extension.Footnote,
-		extension.Typographer,
-	),
-	goldmark.WithParserOptions(
-		parser.WithAutoHeadingID(),
-		parser.WithAttribute(),
-	),
-)

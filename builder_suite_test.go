@@ -27,10 +27,10 @@ var _ = Describe("Builder", func() {
 	createFile := func(filename, contents string) {
 		fullPath := filepath.Join(sourcePath, filename)
 
-		err := os.MkdirAll(filepath.Dir(fullPath), 0777)
+		err := os.MkdirAll(filepath.Dir(fullPath), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 
-		err = os.WriteFile(fullPath, []byte(contents), 0777)
+		err = os.WriteFile(fullPath, []byte(contents), os.ModePerm)
 		Expect(err).NotTo(HaveOccurred())
 	}
 

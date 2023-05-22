@@ -51,7 +51,9 @@ func (d *Doc) Title() string {
 		return ""
 	}
 
-	return matches[0][1]
+	d.metadata.Title = matches[0][1]
+
+	return d.metadata.Title
 }
 
 func (d *Doc) Description() string {
