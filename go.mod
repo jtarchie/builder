@@ -7,7 +7,7 @@ require (
 	github.com/alecthomas/kong v0.7.1
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/gosimple/slug v1.13.1
-	github.com/onsi/ginkgo/v2 v2.9.5
+	github.com/onsi/ginkgo/v2 v2.9.7
 	github.com/onsi/gomega v1.27.7
 	github.com/otiai10/copy v1.11.0
 	github.com/samber/lo v1.38.1
