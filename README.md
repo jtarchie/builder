@@ -25,4 +25,10 @@ npm install -g @mermaid-js/mermaid-cli # for server side mermaid
 builder --source-path <directory> --build-path <output-directory>
 ```
 
+### Example
+
 See the `example/` for to see how it should look.
+
+```bash
+go run cmd/main.go --source-path ./example --build-path build/ --serve
+```

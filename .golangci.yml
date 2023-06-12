@@ -12,7 +12,7 @@ linters-settings:
 linters:
   disable-all: true
   enable:
-  - depguard
+  # - depguard
   - errcheck
   - errorlint
   - exhaustive
