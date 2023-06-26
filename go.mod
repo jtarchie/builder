@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/adrg/frontmatter v0.2.0
-	github.com/alecthomas/kong v0.7.1
+	github.com/alecthomas/kong v0.8.0
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.10.2
