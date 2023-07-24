@@ -9,7 +9,7 @@ require (
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/onsi/ginkgo/v2 v2.11.0
-	github.com/onsi/gomega v1.27.8
+	github.com/onsi/gomega v1.27.9
 	github.com/otiai10/copy v1.12.0
 	github.com/samber/lo v1.38.1
 	github.com/yuin/goldmark v1.5.4
