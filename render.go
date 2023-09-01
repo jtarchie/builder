@@ -139,12 +139,17 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 		return fmt.Errorf("could not read markdown doc (%s): %w", match, err)
 	}
 
-	if doc.Title() == "" {
+	viewDoc := &ViewDoc{
+		Doc:        doc,
+		sourcePath: r.sourcePath,
+	}
+
+	if viewDoc.Title() == "" {
 		//nolint:goerr113
 		return fmt.Errorf("could not determine title (%s)", match)
 	}
 
-	markdown, err := template.New(match).Funcs(funcMap).Parse(doc.Contents())
+	markdown, err := template.New(match).Funcs(funcMap).Parse(viewDoc.Contents())
 	if err != nil {
 		return fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
 	}
@@ -162,7 +167,7 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 	}
 
 	err = layout.Execute(layoutWriter, map[string]any{
-		"Doc": doc,
+		"Doc": viewDoc,
 		//nolint:gosec
 		"RenderedPage": template.HTML(renderedWriter.String()),
 	})
@@ -179,7 +184,7 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 	}
 
 	if !strings.Contains(newFilename, "index.html") {
-		newFilename = strings.Replace(newFilename, ".html", "-"+slug.Make(doc.Title())+".html", 1)
+		newFilename = strings.Replace(newFilename, ".html", "-"+slug.Make(viewDoc.Title())+".html", 1)
 
 		err = writeFile(newFilename, layoutWriter.String())
 		if err != nil {
