@@ -8,7 +8,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.11.1
-	github.com/onsi/ginkgo/v2 v2.11.0
+	github.com/onsi/ginkgo/v2 v2.12.0
 	github.com/onsi/gomega v1.27.10
 	github.com/otiai10/copy v1.12.0
 	github.com/samber/lo v1.38.1
@@ -26,7 +26,7 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/pprof v0.0.0-20230705174524-200ffdc848b8 // indirect
+	github.com/google/pprof v0.0.0-20230821062121-407c9e7a662f // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
