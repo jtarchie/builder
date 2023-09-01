@@ -12,16 +12,18 @@ type ViewDoc struct {
 	sourcePath string
 }
 
-func (d *ViewDoc) Path() string {
-	path := strings.Replace(
+func (d *ViewDoc) RelativePath() string {
+	return strings.Replace(
 		d.filename,
 		d.sourcePath,
 		"",
 		1,
 	)
+}
 
+func (d *ViewDoc) Path() string {
 	return strings.Replace(
-		path,
+		d.RelativePath(),
 		".md",
 		".html",
 		1,
