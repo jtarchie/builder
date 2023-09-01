@@ -162,10 +162,9 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 	}
 
 	err = layout.Execute(layoutWriter, map[string]any{
-		"Title":       doc.Title(),
-		"Description": doc.Description(),
+		"Doc": doc,
 		//nolint:gosec
-		"Page": template.HTML(renderedWriter.String()),
+		"RenderedPage": template.HTML(renderedWriter.String()),
 	})
 	if err != nil {
 		return fmt.Errorf("could not render layout template (%s): %w", match, err)

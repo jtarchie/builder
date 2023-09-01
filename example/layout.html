@@ -6,7 +6,7 @@
         <meta name="description" content="{{.Description}}">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <link rel="stylesheet" href="https://unpkg.com/@picocss/pico@1.*/css/pico.classless.min.css">
-        <title>{{.Title}}</title>
+        <title>{{.Doc.Title}}</title>
         <style>
             @media print {
                 nav {
@@ -29,7 +29,7 @@
         </ul>
     </nav>
     <main class="content">
-        {{.Page}}
+        {{.RenderedPage}}
     </main>
     </body>
 </html>

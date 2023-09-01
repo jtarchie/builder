@@ -47,11 +47,11 @@ var _ = Describe("Builder", func() {
 		createFile("layout.html", `
 			<html>
 				<head>
-					<title>{{.Title}}</title>
-					<description>{{.Description}}</description>
+					<title>{{.Doc.Title}}</title>
+					<description>{{.Doc.Description}}</description>
 				</head>
 				<body>
-				{{.Page}}
+				{{.RenderedPage}}
 				</body>
 			</html>
 		`)
