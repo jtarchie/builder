@@ -9,10 +9,12 @@ import (
 	"strings"
 
 	"github.com/adrg/frontmatter"
+	"github.com/djherbis/times"
 	"github.com/gosimple/slug"
 )
 
 type Doc struct {
+	times.Timespec
 	contents   string
 	filename   string
 	metadata   *DocMetadata
@@ -35,11 +37,17 @@ func NewDoc(
 		return nil, fmt.Errorf("could not parse doc (%s): %w", filename, err)
 	}
 
+	timespec, err := times.Stat(filename)
+	if err != nil {
+		return nil, fmt.Errorf("could not get information (%s): %w", filename, err)
+	}
+
 	return &Doc{
 		contents:   contents,
 		filename:   filename,
 		metadata:   metadata,
 		sourcePath: sourcePath,
+		Timespec:   timespec,
 	}, nil
 }
 

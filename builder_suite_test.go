@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/jtarchie/builder"
 	. "github.com/onsi/ginkgo/v2"
@@ -155,8 +156,8 @@ var _ = Describe("Builder", func() {
 title: required
 ---
 {{range $doc := iterDocs "posts/" 3}}
-* [{{$doc.Title}}]({{$doc.Path}}) {{$doc.Basename}}
-* [{{$doc.Title}}]({{$doc.SlugPath}}) {{$doc.Basename}}
+* [{{$doc.Title}}]({{$doc.Path}}) {{$doc.Basename}} {{$doc.ModTime.Format "Jan 02, 2006"}}
+* [{{$doc.Title}}]({{$doc.SlugPath}}) {{$doc.Basename}} {{$doc.BirthTime}}
 {{end}}
 			`)
 			createFile("index-all.md", `
@@ -176,6 +177,9 @@ title: required
 			contents := readFile("index.html")
 			Eventually(contents).ShouldNot(gbytes.Say(`IGNORE ME`))
 			Eventually(contents).Should(gbytes.Say(`<a href=/posts/10.html>some 10 😂 title</a> 10`))
+
+			Eventually(contents).Should(gbytes.Say(time.Now().Format("Jan 02, 2006")))
+
 			Eventually(contents).Should(gbytes.Say(`<a href=/posts/10-some-10-title.html>some 10 😂 title</a> 10`))
 			Eventually(contents).Should(gbytes.Say(`<a href=/posts/09.html>some 9 😂 title</a>`))
 			Eventually(contents).Should(gbytes.Say(`<a href=/posts/08.html>some 8 😂 title</a>`))
