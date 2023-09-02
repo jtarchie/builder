@@ -2,8 +2,11 @@ package builder
 
 import (
 	"fmt"
+	"log/slog"
 	"path/filepath"
 
+	"github.com/bmatcuk/doublestar/v4"
+	"github.com/fsnotify/fsnotify"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -28,11 +31,34 @@ func (c *CLI) Run() error {
 	}
 
 	if c.Serve {
+		watcher, err := fsnotify.NewWatcher()
+		if err != nil {
+			return fmt.Errorf("could not create file watcher: %w", err)
+		}
+		defer watcher.Close()
+
+		go func() {
+			for event := range watcher.Events {
+				matched, _ := doublestar.Match(filepath.Join(c.SourcePath, "**", "*.md"), event.Name)
+
+				if matched {
+					slog.Info("rebuilding markdown files")
+
+					_ = renderer.Execute()
+				}
+			}
+		}()
+
+		err = watcher.Add(c.SourcePath)
+		if err != nil {
+			return fmt.Errorf("could add watching path: %w", err)
+		}
+
 		e := echo.New()
 		e.Use(middleware.Logger())
 		e.Static("/", c.BuildPath)
 
-		err := e.Start(":8080")
+		err = e.Start(":8080")
 		if err != nil {
 			return fmt.Errorf("could not start serving: %w", err)
 		}
