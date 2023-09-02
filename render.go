@@ -12,6 +12,8 @@ import (
 	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
 	"github.com/samber/lo"
+	"github.com/tdewolff/minify"
+	mHTML "github.com/tdewolff/minify/html"
 	"github.com/yuin/goldmark"
 	emoji "github.com/yuin/goldmark-emoji"
 	highlighting "github.com/yuin/goldmark-highlighting"
@@ -209,8 +211,15 @@ func writeHTMLFiles(filenames []string, contents string) error {
 		return fmt.Errorf("could not create path (%s): %w", dirPath, err)
 	}
 
+	writer := &strings.Builder{}
+
+	err = mHTML.Minify(&minify.M{}, writer, strings.NewReader(contents), nil)
+	if err != nil {
+		return fmt.Errorf("could not minify: %w", err)
+	}
+
 	for _, filename := range filenames {
-		err = os.WriteFile(filename, []byte(contents), os.ModePerm)
+		err = os.WriteFile(filename, []byte(writer.String()), os.ModePerm)
 		if err != nil {
 			return fmt.Errorf("could not write path (%s): %w", filename, err)
 		}
