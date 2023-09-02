@@ -11,7 +11,6 @@ import (
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
-	"github.com/samber/lo"
 	"github.com/tdewolff/minify"
 	mHTML "github.com/tdewolff/minify/html"
 	"github.com/yuin/goldmark"
@@ -86,19 +85,14 @@ func (r *Render) Execute() error {
 	}
 
 	funcMap := template.FuncMap{
-		"iterDocs": func(path string, limit int) ([]ViewDoc, error) {
+		"iterDocs": func(path string, limit int) (Docs, error) {
 			pattern := filepath.Join(r.sourcePath, path, "*.md")
-			docs, err := NewDocs(pattern, limit)
+			docs, err := NewDocs(r.sourcePath, pattern, limit)
 			if err != nil {
 				return nil, fmt.Errorf("could not load docs: %w", err)
 			}
 
-			return lo.Map(docs, func(doc *Doc, _ int) ViewDoc {
-				return ViewDoc{
-					Doc:        doc,
-					sourcePath: r.sourcePath,
-				}
-			}), nil
+			return docs, nil
 		},
 	}
 
@@ -136,22 +130,17 @@ func (r *Render) copyAssets() error {
 }
 
 func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *template.Template) error {
-	doc, err := NewDoc(match)
+	doc, err := NewDoc(match, r.sourcePath)
 	if err != nil {
 		return fmt.Errorf("could not read markdown doc (%s): %w", match, err)
 	}
 
-	viewDoc := &ViewDoc{
-		Doc:        doc,
-		sourcePath: r.sourcePath,
-	}
-
-	if viewDoc.Title() == "" {
+	if doc.Title() == "" {
 		//nolint:goerr113
 		return fmt.Errorf("could not determine title (%s)", match)
 	}
 
-	markdown, err := template.New(match).Funcs(funcMap).Parse(viewDoc.Contents())
+	markdown, err := template.New(match).Funcs(funcMap).Parse(doc.Contents())
 	if err != nil {
 		return fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
 	}
@@ -169,7 +158,7 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 	}
 
 	err = layout.Execute(layoutWriter, map[string]any{
-		"Doc": viewDoc,
+		"Doc": doc,
 		//nolint:gosec
 		"RenderedPage": template.HTML(renderedWriter.String()),
 	})
@@ -182,7 +171,7 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 	filenames := []string{withoutSlugFilename}
 
 	if !strings.Contains(withoutSlugFilename, "index.html") {
-		withSlugFilename := strings.Replace(withoutSlugFilename, ".html", "-"+slug.Make(viewDoc.Title())+".html", 1)
+		withSlugFilename := strings.Replace(withoutSlugFilename, ".html", "-"+slug.Make(doc.Title())+".html", 1)
 		filenames = append(filenames, withSlugFilename)
 	}
 

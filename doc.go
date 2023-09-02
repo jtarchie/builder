@@ -4,15 +4,19 @@ import (
 	"bytes"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/adrg/frontmatter"
+	"github.com/gosimple/slug"
 )
 
 type Doc struct {
-	contents string
-	filename string
-	metadata *DocMetadata
+	contents   string
+	filename   string
+	metadata   *DocMetadata
+	sourcePath string
 }
 
 type DocMetadata struct {
@@ -24,6 +28,7 @@ var titleFromHeader = regexp.MustCompile(`(?m)^#\s+(.*)$`)
 
 func NewDoc(
 	filename string,
+	sourcePath string,
 ) (*Doc, error) {
 	metadata, contents, err := parseDoc(filename)
 	if err != nil {
@@ -31,9 +36,10 @@ func NewDoc(
 	}
 
 	return &Doc{
-		contents: contents,
-		filename: filename,
-		metadata: metadata,
+		contents:   contents,
+		filename:   filename,
+		metadata:   metadata,
+		sourcePath: sourcePath,
 	}, nil
 }
 
@@ -82,4 +88,63 @@ func parseDoc(filename string) (*DocMetadata, string, error) {
 	}
 
 	return metadata, string(leftovers), nil
+}
+
+func (d *Doc) RelativePath() string {
+	return strings.Replace(
+		d.filename,
+		d.sourcePath,
+		"",
+		1,
+	)
+}
+
+func (d *Doc) Path() string {
+	return strings.Replace(
+		d.RelativePath(),
+		".md",
+		".html",
+		1,
+	)
+}
+
+func (d *Doc) SlugPath() string {
+	path := strings.Replace(
+		d.filename,
+		d.sourcePath,
+		"",
+		1,
+	)
+
+	base := filepath.Base(path)
+	parts := strings.Split(filepath.Base(path), ".")
+	parts[0] = slug.Make(parts[0] + " " + d.Title())
+	newBase := strings.Join(parts, ".")
+
+	path = strings.Replace(
+		path,
+		base,
+		newBase,
+		1,
+	)
+
+	path = strings.Replace(
+		path,
+		".md",
+		".html",
+		1,
+	)
+
+	return path
+}
+
+func (d *Doc) Basename() string {
+	basename := filepath.Base(d.Path())
+
+	return strings.Replace(
+		basename,
+		".html",
+		"",
+		1,
+	)
 }

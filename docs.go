@@ -12,6 +12,7 @@ import (
 type Docs []*Doc
 
 func NewDocs(
+	sourcePath string,
 	pattern string,
 	limit int,
 ) (Docs, error) {
@@ -34,7 +35,7 @@ func NewDocs(
 	docs := Docs{}
 
 	for _, match := range matches {
-		doc, err := NewDoc(match)
+		doc, err := NewDoc(match, sourcePath)
 		if err != nil {
 			return nil, fmt.Errorf("could not open doc (%s): %w", match, err)
 		}
