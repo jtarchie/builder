@@ -15,11 +15,11 @@ embrace a more straightforward approach to building your website.
   - **GitHub Flavored Markdown**: Write markdown the GitHub way.
 
     ````markdown
-      ```javascript
-      function hello() {
-        console.log("Hello, GitHub!");
-      }
-      ```
+    ```javascript
+    function hello() {
+      console.log("Hello, GitHub!");
+    }
+    ```
     ````
   - **Emoji Support**: Add a touch of fun with emoji support in your content.
 
@@ -29,21 +29,21 @@ embrace a more straightforward approach to building your website.
   - **Mermaid Diagrams**: Visualize your ideas with Mermaid diagrams.
 
     ````markdown
-      ```mermaid
-      graph TD;
-          A-->B;
-          A-->C;
-          B-->D;
-          C-->D;
-      ```
+    ```mermaid
+    graph TD;
+        A-->B;
+        A-->C;
+        B-->D;
+        C-->D;
+    ```
     ````
   - **Syntax Highlighting**: Make your code snippets stand out.
 
     ````markdown
-      ```python
-      def greet():
-          print("Hello, World!")
-      ```
+    ```python
+    def greet():
+        print("Hello, World!")
+    ```
     ````
   - **Definition Lists, Footnotes, and Typographer**: Add rich details to your
     content.
@@ -139,4 +139,6 @@ go run cmd/main.go --source-path ./example --build-path build/ --serve
 ## Sites Using Builder
 
 - [https://jtarchie.com](https://jtarchie.com) with
-  [source](https://github.com/jtarchie/site)
+  [source](https://github.com/jtarchie/site). It uses a custom
+  [Github Action](https://github.com/jtarchie/site/blob/8d2926abacc2aaf6aedc993bb91f20df7a554367/.github/workflows/publish.yml)
+  to deploy this to Cloudflare Pages.
