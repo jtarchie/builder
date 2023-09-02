@@ -175,21 +175,18 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 		return fmt.Errorf("could not render layout template (%s): %w", match, err)
 	}
 
-	newFilename := strings.Replace(match, r.sourcePath, r.buildPath, 1)
-	newFilename = strings.Replace(newFilename, ".md", ".html", 1)
+	withoutSlugFilename := strings.Replace(match, r.sourcePath, r.buildPath, 1)
+	withoutSlugFilename = strings.Replace(withoutSlugFilename, ".md", ".html", 1)
+	filenames := []string{withoutSlugFilename}
 
-	err = writeFile(newFilename, layoutWriter.String())
-	if err != nil {
-		return fmt.Errorf("could write new template (%s): %w", newFilename, err)
+	if !strings.Contains(withoutSlugFilename, "index.html") {
+		withSlugFilename := strings.Replace(withoutSlugFilename, ".html", "-"+slug.Make(viewDoc.Title())+".html", 1)
+		filenames = append(filenames, withSlugFilename)
 	}
 
-	if !strings.Contains(newFilename, "index.html") {
-		newFilename = strings.Replace(newFilename, ".html", "-"+slug.Make(viewDoc.Title())+".html", 1)
-
-		err = writeFile(newFilename, layoutWriter.String())
-		if err != nil {
-			return fmt.Errorf("could write new template (%s): %w", newFilename, err)
-		}
+	err = writeHTMLFiles(filenames, layoutWriter.String())
+	if err != nil {
+		return fmt.Errorf("could write new template: %w", err)
 	}
 
 	return nil
@@ -204,17 +201,19 @@ func readFile(filename string) (string, error) {
 	return string(contents), nil
 }
 
-func writeFile(filename, contents string) error {
-	dirPath := filepath.Dir(filename)
+func writeHTMLFiles(filenames []string, contents string) error {
+	dirPath := filepath.Dir(filenames[0])
 
 	err := os.MkdirAll(dirPath, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("could not create path (%s): %w", dirPath, err)
 	}
 
-	err = os.WriteFile(filename, []byte(contents), os.ModePerm)
-	if err != nil {
-		return fmt.Errorf("could not write path (%s): %w", filename, err)
+	for _, filename := range filenames {
+		err = os.WriteFile(filename, []byte(contents), os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("could not write path (%s): %w", filename, err)
+		}
 	}
 
 	return nil
