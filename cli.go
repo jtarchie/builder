@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/fsnotify/fsnotify"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -31,28 +30,24 @@ func (c *CLI) Run() error {
 	}
 
 	if c.Serve {
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			return fmt.Errorf("could not create file watcher: %w", err)
-		}
-		defer watcher.Close()
+		watcher := NewWatcher(c.SourcePath)
 
-		go func() {
-			for event := range watcher.Events {
-				matched, _ := doublestar.Match(filepath.Join(c.SourcePath, "**", "*.md"), event.Name)
+		//nolint:errcheck,unparam
+		go watcher.Execute(func(filename string) error {
+			glob := filepath.Join(c.SourcePath, "**", "*.md")
+			matched, _ := doublestar.Match(glob, filename)
 
-				if matched {
-					slog.Info("rebuilding markdown files")
+			if matched {
+				slog.Info("rebuilding markdown files")
 
-					_ = renderer.Execute()
+				err := renderer.Execute()
+				if err != nil {
+					slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
 				}
 			}
-		}()
 
-		err = watcher.Add(c.SourcePath)
-		if err != nil {
-			return fmt.Errorf("could add watching path: %w", err)
-		}
+			return nil
+		})
 
 		e := echo.New()
 		e.Use(middleware.Logger())
