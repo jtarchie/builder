@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
 	"github.com/tdewolff/minify"
@@ -69,7 +68,7 @@ func (r *Render) Execute() error {
 	// foreach markdown file
 	pattern := filepath.Join(r.sourcePath, "**", "*.md")
 
-	matches, err := doublestar.FilepathGlob(pattern)
+	docs, err := NewDocs(r.sourcePath, pattern, 0, false)
 	if err != nil {
 		return fmt.Errorf("could not glob markdown files: %w", err)
 	}
@@ -87,7 +86,7 @@ func (r *Render) Execute() error {
 	funcMap := template.FuncMap{
 		"iterDocs": func(path string, limit int) (Docs, error) {
 			pattern := filepath.Join(r.sourcePath, path, "*.md")
-			docs, err := NewDocs(r.sourcePath, pattern, limit)
+			docs, err := NewDocs(r.sourcePath, pattern, limit, true)
 			if err != nil {
 				return nil, fmt.Errorf("could not load docs: %w", err)
 			}
@@ -96,8 +95,8 @@ func (r *Render) Execute() error {
 		},
 	}
 
-	for _, match := range matches {
-		err := r.renderMarkdown(match, funcMap, layout)
+	for _, doc := range docs {
+		err := r.renderMarkdown(doc, funcMap, layout)
 		if err != nil {
 			return fmt.Errorf("rendering template issue: %w", err)
 		}
@@ -129,11 +128,8 @@ func (r *Render) copyAssets() error {
 	return nil
 }
 
-func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *template.Template) error {
-	doc, err := NewDoc(match, r.sourcePath)
-	if err != nil {
-		return fmt.Errorf("could not read markdown doc (%s): %w", match, err)
-	}
+func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *template.Template) error {
+	match := doc.Filename()
 
 	if doc.Title() == "" {
 		//nolint:goerr113
@@ -166,7 +162,7 @@ func (r *Render) renderMarkdown(match string, funcMap template.FuncMap, layout *
 		return fmt.Errorf("could not render layout template (%s): %w", match, err)
 	}
 
-	withoutSlugFilename := strings.Replace(match, r.sourcePath, r.buildPath, 1)
+	withoutSlugFilename := strings.Replace(doc.Filename(), r.sourcePath, r.buildPath, 1)
 	withoutSlugFilename = strings.Replace(withoutSlugFilename, ".md", ".html", 1)
 	filenames := []string{withoutSlugFilename}
 

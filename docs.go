@@ -15,15 +15,18 @@ func NewDocs(
 	sourcePath string,
 	pattern string,
 	limit int,
+	filterIndexes bool,
 ) (Docs, error) {
 	matches, err := doublestar.FilepathGlob(pattern)
 	if err != nil {
 		return nil, fmt.Errorf("could not matches (%q): %w", pattern, err)
 	}
 
-	matches = lo.Filter(matches, func(match string, _ int) bool {
-		return !strings.HasSuffix(match, "index.md")
-	})
+	if filterIndexes {
+		matches = lo.Filter(matches, func(match string, _ int) bool {
+			return !strings.HasSuffix(match, "index.md")
+		})
+	}
 
 	sort.Strings(matches)
 	matches = lo.Reverse(matches)
