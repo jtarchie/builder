@@ -6,15 +6,17 @@ import (
 	"path/filepath"
 
 	"github.com/bmatcuk/doublestar/v4"
+	"github.com/jtarchie/builder/indexers"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
 type CLI struct {
-	SourcePath     string `help:"source of all files" required:"" type:"path"`
 	BuildPath      string `help:"where generated content should go" required:"" type:"path"`
+	Index          bool   `help:"index the documents for fusejs usage"`
 	LayoutFilename string `help:"layout file to render" required:"" default:"layout.html"`
 	Serve          bool   `help:"serve when done building"`
+	SourcePath     string `help:"source of all files" required:"" type:"path"`
 }
 
 func (c *CLI) Run() error {
@@ -27,6 +29,15 @@ func (c *CLI) Run() error {
 	err := renderer.Execute()
 	if err != nil {
 		return fmt.Errorf("could not execute render: %w", err)
+	}
+
+	if c.Index {
+		indexer := indexers.NewFuseJS(c.BuildPath)
+
+		err = indexer.Execute()
+		if err != nil {
+			return fmt.Errorf("could not execute indexer: %w", err)
+		}
 	}
 
 	if c.Serve {

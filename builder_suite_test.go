@@ -229,6 +229,7 @@ title: required
 				SourcePath:     examplePath,
 				BuildPath:      buildPath,
 				LayoutFilename: "layout.html",
+				Index:          true,
 			}
 
 			err = cli.Run()
@@ -240,6 +241,10 @@ title: required
 			buffer := gbytes.BufferWithBytes(contents)
 
 			Eventually(buffer).Should(gbytes.Say(`<h2 id=h2-heading>h2 Heading</h2>`))
+
+			contents, err = os.ReadFile(filepath.Join(buildPath, "index.json"))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(contents).To(ContainSubstring(`"keys"`))
 		})
 	})
 })
