@@ -157,7 +157,7 @@ title: required
 ---
 {{range $doc := iterDocs "posts/" 3}}
 * [{{$doc.Title}}]({{$doc.Path}}) {{$doc.Basename}} {{$doc.ModTime.Format "Jan 02, 2006"}}
-* [{{$doc.Title}}]({{$doc.SlugPath}}) {{$doc.Basename}} {{if $doc.HasChangeTime}}{{$doc.BirthTime}}{{end}}
+* [{{$doc.Title}}]({{$doc.SlugPath}}) {{$doc.Basename}} {{if $doc.HasBirthTime}}{{$doc.BirthTime}}{{end}}
 {{end}}
 			`)
 			createFile("index-all.md", `
