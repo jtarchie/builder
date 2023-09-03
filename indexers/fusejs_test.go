@@ -1,13 +1,12 @@
-package builder_test
+package indexers_test
 
 import (
 	"os"
 	"path/filepath"
 
+	"github.com/jtarchie/builder/indexers"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	"github.com/jtarchie/builder"
 )
 
 var _ = Describe("Indexer", func() {
@@ -30,7 +29,7 @@ var _ = Describe("Indexer", func() {
 		err = os.WriteFile(filepath.Join(tmpDir, "sample.html"), []byte(htmlContent), 0644)
 		Expect(err).ToNot(HaveOccurred())
 
-		indexer := builder.NewIndexer(tmpDir)
+		indexer := indexers.NewFuseJS(tmpDir)
 
 		err = indexer.Execute()
 		Expect(err).ToNot(HaveOccurred())

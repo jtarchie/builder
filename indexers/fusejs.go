@@ -1,7 +1,8 @@
-package builder
+package indexers
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,12 +14,15 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 )
 
+//go:embed fusejs/build.bundle.js
+var searchBuildJS string
+
 type Indexer struct {
 	buildPath string
 	vm        *goja.Runtime
 }
 
-func NewIndexer(
+func NewFuseJS(
 	buildPath string,
 ) *Indexer {
 	vm := goja.New()

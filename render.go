@@ -22,9 +22,6 @@ import (
 	"go.abhg.dev/goldmark/mermaid"
 )
 
-//go:embed search/build.bundle.js
-var searchBuildJS string
-
 type Render struct {
 	layoutPath string
 	sourcePath string

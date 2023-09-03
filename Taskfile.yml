@@ -18,4 +18,4 @@ tasks:
     - task: example
   search:
     cmds:
-    - esbuild --bundle --platform=node  --tree-shaking=true search/build.js > search/build.bundle.js
+    - esbuild --bundle --platform=node  --tree-shaking=true indexers/fusejs/build.js > indexers/fusejs/build.bundle.js
