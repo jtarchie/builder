@@ -31,3 +31,4 @@ builder
 Brewfile.lock.json
 dist/
 .DS_Store
+search/lunrjs

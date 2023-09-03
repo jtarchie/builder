@@ -2,13 +2,18 @@ package builder
 
 import (
 	"bytes"
+	_ "embed"
 	"fmt"
 	"html/template"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
+	"github.com/bmatcuk/doublestar/v4"
+	"github.com/dop251/goja"
 	"github.com/gosimple/slug"
+	"github.com/microcosm-cc/bluemonday"
 	cp "github.com/otiai10/copy"
 	"github.com/tdewolff/minify"
 	mHTML "github.com/tdewolff/minify/html"
@@ -20,6 +25,9 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/mermaid"
 )
+
+//go:embed search/build.bundle.js
+var searchBuildJS string
 
 type Render struct {
 	layoutPath string
@@ -99,6 +107,61 @@ func (r *Render) Execute() error {
 		err := r.renderMarkdown(doc, funcMap, layout)
 		if err != nil {
 			return fmt.Errorf("rendering template issue: %w", err)
+		}
+	}
+
+	vm := goja.New()
+	vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+
+	type docPayload struct {
+		RelativePath string `json:"id"`
+		Title        string `json:"title"`
+		Contents     string `json:"contents"`
+	}
+
+	matches, err := doublestar.FilepathGlob(filepath.Join(r.buildPath, "**", "*.html"))
+	if err != nil {
+		return fmt.Errorf("could not find HTML files for indexing: %w", err)
+	}
+
+	documents := []docPayload{}
+
+	policy := bluemonday.StrictPolicy()
+
+	for _, filename := range matches {
+		contents, err := os.ReadFile(filename)
+		if err != nil {
+			return fmt.Errorf("could not read file for indexing (%q): %w", filename, err)
+		}
+
+		doc, err := goquery.NewDocumentFromReader(bytes.NewReader(contents))
+		if err != nil {
+			return fmt.Errorf("could not parse file for HTML (%q): %w", filename, err)
+		}
+
+		documents = append(documents, docPayload{
+			RelativePath: strings.Replace(filename, r.buildPath, "", 1),
+			Title:        doc.Find("title").First().Text(),
+			Contents:     policy.Sanitize(string(contents)),
+		})
+	}
+
+	err = vm.Set("documents", documents)
+	if err != nil {
+		return fmt.Errorf("could not create documents for index: %w", err)
+	}
+
+	val, err := vm.RunString(searchBuildJS)
+	if err != nil {
+		return fmt.Errorf("could not build index: %w", err)
+	}
+
+	if json, ok := val.Export().(string); ok {
+		indexFilename := filepath.Join(r.buildPath, "index.json")
+
+		err = os.WriteFile(indexFilename, []byte(json), os.ModePerm)
+		if err != nil {
+			return fmt.Errorf("could not write index file (%q): %w", indexFilename, err)
 		}
 	}
 
