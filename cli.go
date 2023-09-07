@@ -2,6 +2,7 @@ package builder
 
 import (
 	"fmt"
+	"log"
 	"log/slog"
 	"path/filepath"
 
@@ -43,22 +44,26 @@ func (c *CLI) Run() error {
 	if c.Serve {
 		watcher := NewWatcher(c.SourcePath)
 
-		//nolint:errcheck,unparam
-		go watcher.Execute(func(filename string) error {
-			glob := filepath.Join(c.SourcePath, "**", "*.md")
-			matched, _ := doublestar.Match(glob, filename)
+		go func() {
+			err := watcher.Execute(func(filename string) error {
+				glob := filepath.Join(c.SourcePath, "**", "*.md")
+				matched, _ := doublestar.Match(glob, filename)
 
-			if matched {
-				slog.Info("rebuilding markdown files")
+				if matched {
+					slog.Info("rebuilding markdown files")
 
-				err := renderer.Execute()
-				if err != nil {
-					slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
+					err := renderer.Execute()
+					if err != nil {
+						slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
+					}
 				}
-			}
 
-			return nil
-		})
+				return nil
+			})
+			if err != nil {
+				log.Fatalf("could not run watcher: %s", err)
+			}
+		}()
 
 		e := echo.New()
 		e.Use(middleware.Logger())

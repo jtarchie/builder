@@ -134,7 +134,6 @@ func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *temp
 	match := doc.Filename()
 
 	if doc.Title() == "" {
-		//nolint:goerr113
 		return fmt.Errorf("could not determine title (%s)", match)
 	}
 
@@ -160,8 +159,7 @@ func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *temp
 	}
 
 	err = layout.Execute(layoutWriter, map[string]any{
-		"Doc": doc,
-		//nolint:gosec
+		"Doc":          doc,
 		"RenderedPage": template.HTML(renderedWriter.String()),
 	})
 	if err != nil {

@@ -21,12 +21,16 @@ var _ = Describe("Watcher", func() {
 
 			watcher := builder.NewWatcher(sourceDir)
 
-			//nolint:errcheck,unparam
-			go watcher.Execute(func(filename string) error {
-				foundFilename.Store(filename)
+			go func() {
+				defer GinkgoRecover()
 
-				return nil
-			})
+				err := watcher.Execute(func(filename string) error {
+					foundFilename.Store(filename)
+
+					return nil
+				})
+				Expect(err).NotTo(HaveOccurred())
+			}()
 
 			Consistently(foundFilename.Load).Should(Equal(""))
 
@@ -59,12 +63,16 @@ var _ = Describe("Watcher", func() {
 
 			watcher := builder.NewWatcher(sourceDir)
 
-			//nolint:errcheck,unparam
-			go watcher.Execute(func(filename string) error {
-				callbackCount.Add(1)
+			go func() {
+				defer GinkgoRecover()
 
-				return fmt.Errorf("some error")
-			})
+				err := watcher.Execute(func(filename string) error {
+					callbackCount.Add(1)
+
+					return fmt.Errorf("some error")
+				})
+				Expect(err).To(HaveOccurred())
+			}()
 
 			Consistently(callbackCount.Load).Should(BeEquivalentTo(0))
 
