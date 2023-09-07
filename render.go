@@ -61,14 +61,11 @@ func NewRender(
 	}
 }
 
-func (r *Render) Execute() error {
+func (r *Render) Execute(pattern string) error {
 	err := r.copyAssets()
 	if err != nil {
 		return fmt.Errorf("copying assets issue: %w", err)
 	}
-
-	// foreach markdown file
-	pattern := filepath.Join(r.sourcePath, "**", "*.md")
 
 	docs, err := NewDocs(r.sourcePath, pattern, 0, false)
 	if err != nil {

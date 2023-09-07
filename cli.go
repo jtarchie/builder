@@ -27,7 +27,7 @@ func (c *CLI) Run() error {
 		c.BuildPath,
 	)
 
-	err := renderer.Execute()
+	err := renderer.Execute(filepath.Join(c.SourcePath, "**", "*.md"))
 	if err != nil {
 		return fmt.Errorf("could not execute render: %w", err)
 	}
@@ -52,7 +52,7 @@ func (c *CLI) Run() error {
 				if matched {
 					slog.Info("rebuilding markdown files")
 
-					err := renderer.Execute()
+					err := renderer.Execute(filename)
 					if err != nil {
 						slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
 					}
