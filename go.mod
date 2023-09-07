@@ -3,6 +3,7 @@ module github.com/jtarchie/builder
 go 1.20
 
 require (
+	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/adrg/frontmatter v0.2.0
 	github.com/alecthomas/kong v0.8.0
@@ -27,6 +28,8 @@ require (
 
 require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
+	github.com/Masterminds/goutils v1.1.1 // indirect
+	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
 	github.com/andybalholm/cascadia v1.3.1 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
@@ -37,11 +40,18 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/pprof v0.0.0-20230821062121-407c9e7a662f // indirect
+	github.com/google/uuid v1.1.1 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
+	github.com/huandu/xstrings v1.3.3 // indirect
+	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
+	github.com/mitchellh/copystructure v1.0.0 // indirect
+	github.com/mitchellh/reflectwalk v1.0.0 // indirect
+	github.com/shopspring/decimal v1.2.0 // indirect
+	github.com/spf13/cast v1.3.1 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
 	github.com/tdewolff/parse v2.3.4+incompatible // indirect
 	github.com/tdewolff/test v1.0.9 // indirect

@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Masterminds/sprig/v3"
 	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
 	"github.com/tdewolff/minify"
@@ -137,7 +138,11 @@ func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *temp
 		return fmt.Errorf("could not determine title (%s)", match)
 	}
 
-	markdown, err := template.New(match).Funcs(funcMap).Parse(doc.Contents())
+	markdown, err := template.
+		New(match).
+		Funcs(funcMap).
+		Funcs(sprig.FuncMap()).
+		Parse(doc.Contents())
 	if err != nil {
 		return fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
 	}
