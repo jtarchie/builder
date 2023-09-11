@@ -2,6 +2,7 @@ package builder
 
 import (
 	"bytes"
+	// embed file assets.
 	_ "embed"
 	"fmt"
 	"html/template"

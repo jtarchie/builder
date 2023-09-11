@@ -2,6 +2,7 @@ package indexers
 
 import (
 	"bytes"
+	// embed file assets.
 	_ "embed"
 	"fmt"
 	"os"
