@@ -18,7 +18,7 @@ func NewWatcher(
 	}
 }
 
-func (w *Watcher) Execute(fn func(string) error) error {
+func (w *Watcher) Execute(watchFn func(string) error) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return fmt.Errorf("could not create file watcher: %w", err)
@@ -31,7 +31,7 @@ func (w *Watcher) Execute(fn func(string) error) error {
 	}
 
 	for event := range watcher.Events {
-		err := fn(event.Name)
+		err := watchFn(event.Name)
 		if err != nil {
 			return fmt.Errorf("could not execute fn in watcher: %w", err)
 		}
