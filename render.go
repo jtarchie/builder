@@ -160,7 +160,8 @@ func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *temp
 	}
 
 	err = layout.Execute(layoutWriter, map[string]any{
-		"Doc":          doc,
+		"Doc": doc,
+		//nolint: gosec
 		"RenderedPage": template.HTML(renderedWriter.String()),
 	})
 	if err != nil {
