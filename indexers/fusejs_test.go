@@ -26,7 +26,7 @@ var _ = Describe("Indexer", func() {
 				</body>
 			</html>
 			`
-		err = os.WriteFile(filepath.Join(tmpDir, "sample.html"), []byte(htmlContent), 0644)
+		err = os.WriteFile(filepath.Join(tmpDir, "sample.html"), []byte(htmlContent), os.ModePerm)
 		Expect(err).ToNot(HaveOccurred())
 
 		indexer := indexers.NewFuseJS(tmpDir)
