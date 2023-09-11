@@ -13,11 +13,11 @@ import (
 )
 
 type CLI struct {
-	BuildPath      string `help:"where generated content should go" required:"" type:"path"`
+	BuildPath      string `help:"where generated content should go"    required:""                  type:"path"`
 	Index          bool   `help:"index the documents for fusejs usage"`
-	LayoutFilename string `help:"layout file to render" required:"" default:"layout.html"`
+	LayoutFilename string `default:"layout.html"                       help:"layout file to render" required:""`
 	Serve          bool   `help:"serve when done building"`
-	SourcePath     string `help:"source of all files" required:"" type:"path"`
+	SourcePath     string `help:"source of all files"                  required:""                  type:"path"`
 }
 
 func (c *CLI) Run() error {
@@ -44,26 +44,7 @@ func (c *CLI) Run() error {
 	if c.Serve {
 		watcher := NewWatcher(c.SourcePath)
 
-		go func() {
-			err := watcher.Execute(func(filename string) error {
-				glob := filepath.Join(c.SourcePath, "**", "*.md")
-				matched, _ := doublestar.Match(glob, filename)
-
-				if matched {
-					slog.Info("rebuilding markdown files")
-
-					err := renderer.Execute(filename)
-					if err != nil {
-						slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
-					}
-				}
-
-				return nil
-			})
-			if err != nil {
-				log.Fatalf("could not run watcher: %s", err)
-			}
-		}()
+		go c.startWatcher(watcher, renderer)
 
 		e := echo.New()
 		e.Use(middleware.Logger())
@@ -76,4 +57,25 @@ func (c *CLI) Run() error {
 	}
 
 	return nil
+}
+
+func (c *CLI) startWatcher(watcher *Watcher, renderer *Render) {
+	err := watcher.Execute(func(filename string) error {
+		glob := filepath.Join(c.SourcePath, "**", "*.md")
+		matched, _ := doublestar.Match(glob, filename)
+
+		if matched {
+			slog.Info("rebuilding markdown files")
+
+			err := renderer.Execute(filename)
+			if err != nil {
+				slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		log.Fatalf("could not run watcher: %s", err)
+	}
 }
