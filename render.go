@@ -4,6 +4,7 @@ import (
 	"bytes"
 	// embed file assets.
 	_ "embed"
+	"errors"
 	"fmt"
 	"html/template"
 	"os"
@@ -30,6 +31,8 @@ type Render struct {
 	buildPath  string
 	converter  goldmark.Markdown
 }
+
+var errMissingTitle = errors.New("missing title in metadata or h1")
 
 func NewRender(
 	layoutPath string,
@@ -132,7 +135,7 @@ func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *temp
 	match := doc.Filename()
 
 	if doc.Title() == "" {
-		return fmt.Errorf("could not determine title (%s)", match)
+		return fmt.Errorf("could not determine title (%s): %w", match, errMissingTitle)
 	}
 
 	markdown, err := template.
