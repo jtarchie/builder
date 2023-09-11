@@ -1,6 +1,7 @@
 package builder_test
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +11,8 @@ import (
 	. "github.com/onsi/gomega"
 	"go.uber.org/atomic"
 )
+
+var errTest = errors.New("some error")
 
 var _ = Describe("Watcher", func() {
 	When("a file gets updated", func() {
@@ -69,7 +72,7 @@ var _ = Describe("Watcher", func() {
 				err := watcher.Execute(func(filename string) error {
 					callbackCount.Add(1)
 
-					return fmt.Errorf("some error")
+					return errTest
 				})
 				Expect(err).To(HaveOccurred())
 			}()
