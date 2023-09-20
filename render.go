@@ -58,7 +58,8 @@ func NewRender(
 				extension.Footnote,
 				extension.Typographer,
 				&anchor.Extender{
-					Texter: anchor.Text("#"),
+					Texter:   anchor.Text("#"),
+					Position: anchor.Before,
 				},
 			),
 			goldmark.WithParserOptions(
