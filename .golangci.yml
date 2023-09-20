@@ -6,6 +6,7 @@ linters:
   - depguard
   - exhaustruct
   - paralleltest
+  - gomoddirectives
 
   # linters deprecated
   - deadcode
