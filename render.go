@@ -22,6 +22,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
+	"go.abhg.dev/goldmark/anchor"
 	"go.abhg.dev/goldmark/mermaid"
 )
 
@@ -56,6 +57,9 @@ func NewRender(
 				extension.DefinitionList,
 				extension.Footnote,
 				extension.Typographer,
+				&anchor.Extender{
+					Texter: anchor.Text("#"),
+				},
 			),
 			goldmark.WithParserOptions(
 				parser.WithAutoHeadingID(),

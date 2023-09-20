@@ -240,7 +240,7 @@ title: required
 
 			buffer := gbytes.BufferWithBytes(contents)
 
-			Eventually(buffer).Should(gbytes.Say(`<h2 id=h2-heading>h2 Heading</h2>`))
+			Eventually(buffer).Should(gbytes.Say(`<h2 id=h2-heading>h2 Heading <a class=anchor href=#h2-heading>#</a></h2>`))
 
 			contents, err = os.ReadFile(filepath.Join(buildPath, "index.json"))
 			Expect(err).NotTo(HaveOccurred())

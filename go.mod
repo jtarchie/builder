@@ -22,6 +22,7 @@ require (
 	github.com/yuin/goldmark v1.5.6
 	github.com/yuin/goldmark-emoji v1.0.2
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
+	go.abhg.dev/goldmark/anchor v0.1.1
 	go.abhg.dev/goldmark/mermaid v0.4.0
 	go.uber.org/atomic v1.11.0
 )
