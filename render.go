@@ -130,7 +130,14 @@ func (r *Render) copyAssets() error {
 	assetsPath := r.assetsPath
 
 	if _, err := os.Stat(assetsPath); !os.IsNotExist(err) {
-		err = cp.Copy(assetsPath, r.buildPath)
+		opt := cp.Options{
+			Skip: func(info os.FileInfo, src, dest string) (bool, error) {
+				// skip dot files
+				return strings.HasPrefix(filepath.Base(src), "."), nil
+			},
+		}
+
+		err = cp.Copy(assetsPath, r.buildPath, opt)
 		if err != nil {
 			return fmt.Errorf("could not copy assets contents (%s): %w", assetsPath, err)
 		}

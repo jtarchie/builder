@@ -248,6 +248,7 @@ title: required
 			createLayout()
 			createFile("dir/index.md", "# some text")
 			createFile("dir/test.html", "some other text")
+			createFile(".gitignore", "do not copy")
 
 			cli.AssetsPath = cli.SourcePath
 
@@ -259,6 +260,9 @@ title: required
 
 			contents = readFile("dir/index.html")
 			Expect(contents).To(gbytes.Say(`some text`))
+
+			notExist := filepath.Join(buildPath, ".gitignore")
+			Expect(notExist).NotTo(BeAnExistingFile())
 		})
 	})
 })
