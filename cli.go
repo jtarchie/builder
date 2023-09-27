@@ -60,7 +60,7 @@ func (c *CLI) startWatcher(watcher *Watcher, renderer *Render) {
 		matched, _ := doublestar.Match(glob, filename)
 
 		if matched {
-			slog.Info("rebuilding markdown files")
+			slog.Info("rebuilding markdown files", slog.String("filename", filename))
 
 			err := renderer.Execute(filename)
 			if err != nil {
