@@ -12,16 +12,22 @@ import (
 )
 
 type CLI struct {
-	BuildPath      string `help:"where generated content should go" required:""                  type:"path"`
-	LayoutFilename string `default:"layout.html"                    help:"layout file to render" required:""`
+	BuildPath      string `help:"where generated content should go"                          required:""                  type:"path"`
+	LayoutFilename string `default:"layout.html"                                             help:"layout file to render" required:""`
 	Serve          bool   `help:"serve when done building"`
-	SourcePath     string `help:"source of all files"               required:""                  type:"path"`
+	SourcePath     string `help:"source of all files"                                        required:""                  type:"path"`
+	AssetsPath     string `help:"path to static assets (default with be source-path/public)"`
 }
 
 func (c *CLI) Run() error {
+	if c.AssetsPath == "" {
+		c.AssetsPath = filepath.Join(c.SourcePath, "public")
+	}
+
 	renderer := NewRender(
 		filepath.Join(c.SourcePath, c.LayoutFilename),
 		c.SourcePath,
+		c.AssetsPath,
 		c.BuildPath,
 	)
 

@@ -29,6 +29,7 @@ import (
 type Render struct {
 	layoutPath string
 	sourcePath string
+	assetsPath string
 	buildPath  string
 	converter  goldmark.Markdown
 }
@@ -38,11 +39,13 @@ var errMissingTitle = errors.New("missing title in metadata or h1")
 func NewRender(
 	layoutPath string,
 	sourcePath string,
+	assetsPath string,
 	buildPath string,
 ) *Render {
 	return &Render{
 		layoutPath: layoutPath,
 		sourcePath: sourcePath,
+		assetsPath: assetsPath,
 		buildPath:  buildPath,
 		converter: goldmark.New(
 			goldmark.WithRendererOptions(
@@ -124,7 +127,7 @@ func (r *Render) copyAssets() error {
 		return fmt.Errorf("could not create build path (%s): %w", r.buildPath, err)
 	}
 
-	assetsPath := filepath.Join(r.sourcePath, "public")
+	assetsPath := r.assetsPath
 
 	if _, err := os.Stat(assetsPath); !os.IsNotExist(err) {
 		err = cp.Copy(assetsPath, r.buildPath)
