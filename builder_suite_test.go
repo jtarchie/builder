@@ -242,4 +242,23 @@ title: required
 			Eventually(buffer).Should(gbytes.Say(`<h2 id=h2-heading><a class=anchor href=#h2-heading>#</a> h2 Heading</h2>`))
 		})
 	})
+
+	When("using asset path", func() {
+		It("copies all files", func() {
+			createLayout()
+			createFile("dir/index.md", "# some text")
+			createFile("dir/test.html", "some other text")
+
+			cli.AssetsPath = cli.SourcePath
+
+			err := cli.Run()
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := readFile("dir/test.html")
+			Expect(contents).To(gbytes.Say(`some other text`))
+
+			contents = readFile("dir/index.html")
+			Expect(contents).To(gbytes.Say(`some text`))
+		})
+	})
 })
