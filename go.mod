@@ -12,8 +12,8 @@ require (
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/onsi/ginkgo/v2 v2.12.1
-	github.com/onsi/gomega v1.27.10
-	github.com/otiai10/copy v1.12.0
+	github.com/onsi/gomega v1.28.0
+	github.com/otiai10/copy v1.14.0
 	github.com/samber/lo v1.38.1
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/yuin/goldmark v1.5.6
@@ -34,7 +34,7 @@ require (
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/pprof v0.0.0-20230912144702-c363fe2c2ed8 // indirect
+	github.com/google/pprof v0.0.0-20230926050212-f7f687d19a98 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
@@ -54,6 +54,7 @@ require (
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
 	golang.org/x/net v0.15.0 // indirect
+	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
