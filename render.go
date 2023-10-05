@@ -124,7 +124,7 @@ func (r *Render) Execute(pattern string) error {
 		doc := doc
 
 		group.Go(func() error {
-			err := r.renderMarkdown(doc, funcMap, layout)
+			err := r.renderDocument(doc, funcMap, layout)
 			if err != nil {
 				return fmt.Errorf("rendering template issue: %w", err)
 			}
@@ -249,41 +249,52 @@ func (r *Render) copyAssets() error {
 	return nil
 }
 
-func (r *Render) renderMarkdown(doc *Doc, funcMap template.FuncMap, layout *template.Template) error {
-	match := doc.Filename()
+func (r *Render) renderMarkdownFromDoc(doc *Doc, funcMap template.FuncMap) (string, error) {
+	filename := doc.Filename()
 
 	if doc.Title() == "" {
-		return fmt.Errorf("could not determine title (%s): %w", match, errMissingTitle)
+		return "", fmt.Errorf("could not determine title (%s): %w", filename, errMissingTitle)
 	}
 
 	markdown, err := template.
-		New(match).
+		New(filename).
 		Funcs(funcMap).
 		Funcs(sprig.FuncMap()).
 		Parse(doc.Contents())
 	if err != nil {
-		return fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
+		return "", fmt.Errorf("could not parse markdown template (%s): %w", r.layoutPath, err)
 	}
 
-	layoutWriter, markdownWriter, renderedWriter := &bytes.Buffer{}, &bytes.Buffer{}, &bytes.Buffer{}
+	markdownWriter, renderedWriter := &bytes.Buffer{}, &bytes.Buffer{}
 
 	err = markdown.Execute(markdownWriter, nil)
 	if err != nil {
-		return fmt.Errorf("could not render markdown template (%s): %w", match, err)
+		return "", fmt.Errorf("could not render markdown template (%s): %w", filename, err)
 	}
 
 	err = r.converter.Convert(markdownWriter.Bytes(), renderedWriter)
 	if err != nil {
-		return fmt.Errorf("could not convert file (%s): %w", match, err)
+		return "", fmt.Errorf("could not convert file (%s): %w", filename, err)
 	}
+
+	return renderedWriter.String(), nil
+}
+
+func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layout *template.Template) error {
+	renderedMarkdown, err := r.renderMarkdownFromDoc(doc, funcMap)
+	if err != nil {
+		return fmt.Errorf("could not render markdown for doc: %w", err)
+	}
+
+	layoutWriter := &bytes.Buffer{}
 
 	err = layout.Execute(layoutWriter, map[string]any{
 		"Doc": doc,
 		//nolint: gosec
-		"RenderedPage": template.HTML(renderedWriter.String()),
+		"RenderedPage": template.HTML(renderedMarkdown),
 	})
 	if err != nil {
-		return fmt.Errorf("could not render layout template (%s): %w", match, err)
+		return fmt.Errorf("could not render layout template (%s): %w", doc.Filename(), err)
 	}
 
 	withoutSlugFilename := strings.Replace(doc.Filename(), r.sourcePath, r.buildPath, 1)
