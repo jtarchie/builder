@@ -139,7 +139,7 @@ func (r *Render) Execute(pattern string) error {
 	}
 
 	if r.baseURL != "" {
-		err = r.generateFeeds(docs)
+		err = r.generateFeeds(docs, funcMap)
 		if err != nil {
 			return fmt.Errorf("could not render feeds: %w", err)
 		}
@@ -149,7 +149,7 @@ func (r *Render) Execute(pattern string) error {
 }
 
 //nolint:funlen
-func (r *Render) generateFeeds(docs Docs) error {
+func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 	now := time.Now().UTC()
 
 	feed := &feeds.Feed{
@@ -179,6 +179,7 @@ func (r *Render) generateFeeds(docs Docs) error {
 		}
 
 		docURL, _ := url.JoinPath(r.baseURL, doc.RelativePath())
+		contents, _ := r.renderMarkdownFromDoc(doc, funcMap)
 
 		feed.Items = append(feed.Items, &feeds.Item{
 			Title: doc.Title(),
@@ -188,6 +189,7 @@ func (r *Render) generateFeeds(docs Docs) error {
 			Description: doc.Description(),
 			Updated:     modifiedTime,
 			Created:     createdTime,
+			Content:     contents,
 		})
 	}
 
