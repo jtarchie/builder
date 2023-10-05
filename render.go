@@ -28,6 +28,7 @@ import (
 	"github.com/yuin/goldmark/renderer/html"
 	"go.abhg.dev/goldmark/anchor"
 	"go.abhg.dev/goldmark/mermaid"
+	"golang.org/x/sync/errgroup"
 )
 
 type Render struct {
@@ -80,6 +81,7 @@ func NewRender(
 	}
 }
 
+//nolint:funlen,cyclop
 func (r *Render) Execute(pattern string) error {
 	err := r.copyAssets()
 	if err != nil {
@@ -113,11 +115,27 @@ func (r *Render) Execute(pattern string) error {
 		},
 	}
 
+	maxRenders := 10
+	group := &errgroup.Group{}
+
+	group.SetLimit(maxRenders)
+
 	for _, doc := range docs {
-		err := r.renderMarkdown(doc, funcMap, layout)
-		if err != nil {
-			return fmt.Errorf("rendering template issue: %w", err)
-		}
+		doc := doc
+
+		group.Go(func() error {
+			err := r.renderMarkdown(doc, funcMap, layout)
+			if err != nil {
+				return fmt.Errorf("rendering template issue: %w", err)
+			}
+
+			return nil
+		})
+	}
+
+	err = group.Wait()
+	if err != nil {
+		return fmt.Errorf("could not render: %w", err)
 	}
 
 	if r.baseURL != "" {
