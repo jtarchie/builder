@@ -12,11 +12,12 @@ import (
 )
 
 type CLI struct {
-	BuildPath      string `help:"where generated content should go"                          required:""                  type:"path"`
-	LayoutFilename string `default:"layout.html"                                             help:"layout file to render" required:""`
+	BuildPath      string `help:"where generated content should go"                                                      required:""                  type:"path"`
+	LayoutFilename string `default:"layout.html"                                                                         help:"layout file to render" required:""`
 	Serve          bool   `help:"serve when done building"`
-	SourcePath     string `help:"source of all files"                                        required:""                  type:"path"`
+	SourcePath     string `help:"source of all files"                                                                    required:""                  type:"path"`
 	AssetsPath     string `help:"path to static assets (default with be source-path/public)"`
+	BaseURL        string `help:"the URL which the contents will be served from, this is only used for generating feeds"`
 }
 
 func (c *CLI) Run() error {
@@ -29,6 +30,7 @@ func (c *CLI) Run() error {
 		c.SourcePath,
 		c.AssetsPath,
 		c.BuildPath,
+		c.BaseURL,
 	)
 
 	err := renderer.Execute(filepath.Join(c.SourcePath, "**", "*.md"))
@@ -62,7 +64,7 @@ func (c *CLI) startWatcher(watcher *Watcher, renderer *Render) {
 		if matched {
 			slog.Info("rebuilding markdown files", slog.String("filename", filename))
 
-			err := renderer.Execute(filename)
+			err := renderer.Execute(glob)
 			if err != nil {
 				slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
 			}

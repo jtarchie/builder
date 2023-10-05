@@ -10,10 +10,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/Masterminds/sprig/v3"
 	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
+	"github.com/sabloger/sitemap-generator/smg"
 	"github.com/tdewolff/minify"
 	mHTML "github.com/tdewolff/minify/html"
 	"github.com/yuin/goldmark"
@@ -27,11 +29,12 @@ import (
 )
 
 type Render struct {
-	layoutPath string
-	sourcePath string
 	assetsPath string
+	baseURL    string
 	buildPath  string
 	converter  goldmark.Markdown
+	layoutPath string
+	sourcePath string
 }
 
 var errMissingTitle = errors.New("missing title in metadata or h1")
@@ -41,12 +44,14 @@ func NewRender(
 	sourcePath string,
 	assetsPath string,
 	buildPath string,
+	baseURL string,
 ) *Render {
 	return &Render{
+		assetsPath: assetsPath,
+		baseURL:    baseURL,
+		buildPath:  buildPath,
 		layoutPath: layoutPath,
 		sourcePath: sourcePath,
-		assetsPath: assetsPath,
-		buildPath:  buildPath,
 		converter: goldmark.New(
 			goldmark.WithRendererOptions(
 				html.WithXHTML(),
@@ -111,6 +116,48 @@ func (r *Render) Execute(pattern string) error {
 		if err != nil {
 			return fmt.Errorf("rendering template issue: %w", err)
 		}
+	}
+
+	if r.baseURL != "" {
+		err = r.generateFeeds(docs)
+		if err != nil {
+			return fmt.Errorf("could not render feeds: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (r *Render) generateFeeds(docs Docs) error {
+	now := time.Now().UTC()
+
+	sitemap := smg.NewSitemap(true)
+	sitemap.SetOutputPath(r.buildPath)
+	sitemap.SetLastMod(&now)
+	sitemap.SetCompress(false)
+	sitemap.SetHostname(r.baseURL)
+
+	for _, doc := range docs {
+		fileInfo, err := os.Stat(doc.Filename())
+		if err != nil {
+			return fmt.Errorf("could not stat file %q: %w", doc.Filename(), err)
+		}
+
+		lastMod := fileInfo.ModTime().UTC()
+
+		err = sitemap.Add(&smg.SitemapLoc{
+			Loc:        doc.RelativePath(),
+			LastMod:    &lastMod,
+			ChangeFreq: smg.Always,
+		})
+		if err != nil {
+			return fmt.Errorf("could not add file %q to sitemap: %w", doc.Filename(), err)
+		}
+	}
+
+	_, err := sitemap.Save()
+	if err != nil {
+		return fmt.Errorf("could not save sitemap: %w", err)
 	}
 
 	return nil
