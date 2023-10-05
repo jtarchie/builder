@@ -167,7 +167,11 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 
 	for _, doc := range docs {
 		modifiedTime := doc.Timespec.ModTime().UTC()
-		createdTime := doc.Timespec.BirthTime().UTC()
+		createdTime := modifiedTime
+
+		if doc.Timespec.HasBirthTime() {
+			createdTime = doc.Timespec.BirthTime().UTC()
+		}
 
 		err := sitemap.Add(&smg.SitemapLoc{
 			Loc:        doc.RelativePath(),
