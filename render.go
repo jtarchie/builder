@@ -7,12 +7,14 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/gorilla/feeds"
 	"github.com/gosimple/slug"
 	cp "github.com/otiai10/copy"
 	"github.com/sabloger/sitemap-generator/smg"
@@ -128,8 +130,16 @@ func (r *Render) Execute(pattern string) error {
 	return nil
 }
 
+//nolint:funlen
 func (r *Render) generateFeeds(docs Docs) error {
 	now := time.Now().UTC()
+
+	feed := &feeds.Feed{
+		Title:       "",
+		Link:        &feeds.Link{Href: r.baseURL},
+		Description: "",
+		Created:     now,
+	}
 
 	sitemap := smg.NewSitemap(true)
 	sitemap.SetOutputPath(r.buildPath)
@@ -138,26 +148,54 @@ func (r *Render) generateFeeds(docs Docs) error {
 	sitemap.SetHostname(r.baseURL)
 
 	for _, doc := range docs {
-		fileInfo, err := os.Stat(doc.Filename())
-		if err != nil {
-			return fmt.Errorf("could not stat file %q: %w", doc.Filename(), err)
-		}
+		modifiedTime := doc.Timespec.ModTime().UTC()
+		createdTime := doc.Timespec.BirthTime().UTC()
 
-		lastMod := fileInfo.ModTime().UTC()
-
-		err = sitemap.Add(&smg.SitemapLoc{
+		err := sitemap.Add(&smg.SitemapLoc{
 			Loc:        doc.RelativePath(),
-			LastMod:    &lastMod,
+			LastMod:    &modifiedTime,
 			ChangeFreq: smg.Always,
 		})
 		if err != nil {
 			return fmt.Errorf("could not add file %q to sitemap: %w", doc.Filename(), err)
 		}
+
+		docURL, _ := url.JoinPath(r.baseURL, doc.RelativePath())
+
+		feed.Items = append(feed.Items, &feeds.Item{
+			Title: doc.Title(),
+			Link: &feeds.Link{
+				Href: docURL,
+			},
+			Description: doc.Description(),
+			Updated:     modifiedTime,
+			Created:     createdTime,
+		})
 	}
 
 	_, err := sitemap.Save()
 	if err != nil {
 		return fmt.Errorf("could not save sitemap: %w", err)
+	}
+
+	atomFeed, err := feed.ToAtom()
+	if err != nil {
+		return fmt.Errorf("could not generate atom feed: %w", err)
+	}
+
+	err = os.WriteFile(filepath.Join(r.buildPath, "atom.xml"), []byte(atomFeed), os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("could not write atom feed: %w", err)
+	}
+
+	rssFeed, err := feed.ToRss()
+	if err != nil {
+		return fmt.Errorf("could not generate rss feed: %w", err)
+	}
+
+	err = os.WriteFile(filepath.Join(r.buildPath, "rss.xml"), []byte(rssFeed), os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("could not write rss feed: %w", err)
 	}
 
 	return nil

@@ -9,11 +9,13 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.6.0
 	github.com/djherbis/times v1.5.0
 	github.com/fsnotify/fsnotify v1.6.0
+	github.com/gorilla/feeds v1.1.1
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/onsi/ginkgo/v2 v2.12.1
 	github.com/onsi/gomega v1.28.0
 	github.com/otiai10/copy v1.14.0
+	github.com/sabloger/sitemap-generator v1.2.2
 	github.com/samber/lo v1.38.1
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/yuin/goldmark v1.5.6
@@ -44,7 +46,6 @@ require (
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
-	github.com/sabloger/sitemap-generator v1.2.2 // indirect
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/spf13/cast v1.5.1 // indirect
 	github.com/stretchr/testify v1.8.2 // indirect
