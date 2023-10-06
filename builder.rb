@@ -5,20 +5,20 @@
 class Builder < Formula
   desc ""
   homepage ""
-  version "0.0.26"
+  version "0.0.27"
 
   on_macos do
     if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.26/builder_darwin_x86_64.tar.gz"
-      sha256 "f34b70e7eb05bf39ba92503b6e5aff0c29476a64b3d3805c75dbbd20c73ea9a0"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_darwin_x86_64.tar.gz"
+      sha256 "28fe6bad5cdab105f65ad067b3ec437af2ca8acc66fe00b0a232210869340e09"
 
       def install
         bin.install "builder"
       end
     end
     if Hardware::CPU.arm?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.26/builder_darwin_arm64.tar.gz"
-      sha256 "c13b1e2d48fd64b6644fcb69b447e29f85ad3ddab9385fa31081837bf4cf13f5"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_darwin_arm64.tar.gz"
+      sha256 "65573be74056de1ec1c8a614f119cc463a67498e0af62e98d1318fd96fce8466"
 
       def install
         bin.install "builder"
@@ -27,17 +27,17 @@ class Builder < Formula
   end
 
   on_linux do
-    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.26/builder_linux_arm64.tar.gz"
-      sha256 "823468be07ee88b0dec0dd0d4dd3bebf61add4f9c98f4bc064d3d4faf8eb051b"
+    if Hardware::CPU.intel?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_linux_x86_64.tar.gz"
+      sha256 "086d2c782ed346942cee0b786b780d27a8e0aa752c19f442352ee3b9a3d398f9"
 
       def install
         bin.install "builder"
       end
     end
-    if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.26/builder_linux_x86_64.tar.gz"
-      sha256 "24fa1c80cbee6a12cf2e4fa969225179ecc3e16a31775e55d2a8ae97e098ad96"
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_linux_arm64.tar.gz"
+      sha256 "38ecad6fb0b39e41155425523a207d7dfafb23a1713cd03dc920567e5d8141bd"
 
       def install
         bin.install "builder"
