@@ -63,7 +63,7 @@ embrace a more straightforward approach to building your website.
     [^1]: This is a footnote.
     ```
 - **Templating Power**: Harness the power of Go's `html/template` package:
-  - **Sprig Functions**: Use of [sprig](https://github.com/Masterminds/sprig
+  - **Sprig Functions**: Use of [sprig](https://github.com/Masterminds/sprig)
   - **Embed Dynamic Content**:
 
     ```markdown
