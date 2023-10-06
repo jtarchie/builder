@@ -265,4 +265,29 @@ title: required
 			Expect(notExist).NotTo(BeAnExistingFile())
 		})
 	})
+
+	When("generating feeds", func() {
+		It("creates RSS, Atom, and sitemap to HTML pages", func() {
+			createLayout()
+			createFile("dir/index.md", "# some text")
+			createFile("other.md", "# some text")
+			createFile("dir/test.html", "some other text")
+
+			cli.BaseURL = "https://example.com"
+			err := cli.Run()
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := readFile("rss.xml")
+			Expect(contents).To(gbytes.Say(`https://example.com/other.html`))
+			Expect(contents).To(gbytes.Say(`https://example.com/dir/index.html`))
+
+			contents = readFile("atom.xml")
+			Expect(contents).To(gbytes.Say(`https://example.com/other.html`))
+			Expect(contents).To(gbytes.Say(`https://example.com/dir/index.html`))
+
+			contents = readFile("sitemap.xml")
+			Expect(contents).To(gbytes.Say(`https://example.com/other.html`))
+			Expect(contents).To(gbytes.Say(`https://example.com/dir/index.html`))
+		})
+	})
 })

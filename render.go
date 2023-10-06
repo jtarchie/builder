@@ -173,8 +173,10 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 			createdTime = doc.Timespec.BirthTime().UTC()
 		}
 
+		docURL, _ := url.JoinPath(r.baseURL, doc.Path())
+
 		err := sitemap.Add(&smg.SitemapLoc{
-			Loc:        doc.RelativePath(),
+			Loc:        docURL,
 			LastMod:    &modifiedTime,
 			ChangeFreq: smg.Always,
 		})
@@ -182,7 +184,6 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 			return fmt.Errorf("could not add file %q to sitemap: %w", doc.Filename(), err)
 		}
 
-		docURL, _ := url.JoinPath(r.baseURL, doc.RelativePath())
 		contents, _ := r.renderMarkdownFromDoc(doc, funcMap)
 
 		feed.Items = append(feed.Items, &feeds.Item{
