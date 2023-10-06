@@ -33,7 +33,9 @@ func (c *CLI) Run() error {
 		c.BaseURL,
 	)
 
-	err := renderer.Execute(filepath.Join(c.SourcePath, "**", "*.md"))
+	markdownGlob := filepath.Join(c.SourcePath, "**", "*.md")
+
+	err := renderer.Execute(markdownGlob)
 	if err != nil {
 		return fmt.Errorf("could not execute render: %w", err)
 	}
@@ -41,7 +43,7 @@ func (c *CLI) Run() error {
 	if c.Serve {
 		watcher := NewWatcher(c.SourcePath)
 
-		go c.startWatcher(watcher, renderer)
+		go c.startWatcher(watcher, renderer, markdownGlob)
 
 		e := echo.New()
 		e.Use(middleware.Logger())
@@ -56,15 +58,20 @@ func (c *CLI) Run() error {
 	return nil
 }
 
-func (c *CLI) startWatcher(watcher *Watcher, renderer *Render) {
+func (c *CLI) startWatcher(
+	watcher *Watcher,
+	renderer *Render,
+	markdownGlob string,
+) {
+	allGlob := filepath.Join(c.SourcePath, "**", "{*.md,*.html,*.js,*.css}")
+
 	err := watcher.Execute(func(filename string) error {
-		glob := filepath.Join(c.SourcePath, "**", "*.md")
-		matched, _ := doublestar.Match(glob, filename)
+		matched, _ := doublestar.Match(allGlob, filename)
 
 		if matched {
 			slog.Info("rebuilding markdown files", slog.String("filename", filename))
 
-			err := renderer.Execute(glob)
+			err := renderer.Execute(markdownGlob)
 			if err != nil {
 				slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
 			}
