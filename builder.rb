@@ -5,20 +5,20 @@
 class Builder < Formula
   desc ""
   homepage ""
-  version "0.0.27"
+  version "0.0.28"
 
   on_macos do
-    if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_darwin_x86_64.tar.gz"
-      sha256 "28fe6bad5cdab105f65ad067b3ec437af2ca8acc66fe00b0a232210869340e09"
+    if Hardware::CPU.arm?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.28/builder_darwin_arm64.tar.gz"
+      sha256 "a0ff082ee15fd286edf860af9a6e4040e13649fadff35ee5e3bf23e06f3e18dd"
 
       def install
         bin.install "builder"
       end
     end
-    if Hardware::CPU.arm?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_darwin_arm64.tar.gz"
-      sha256 "65573be74056de1ec1c8a614f119cc463a67498e0af62e98d1318fd96fce8466"
+    if Hardware::CPU.intel?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.28/builder_darwin_x86_64.tar.gz"
+      sha256 "3e0b9b1c0f3a47bec1bf715a594e005166f3b74b33d11f54cd88652ac910a16e"
 
       def install
         bin.install "builder"
@@ -28,16 +28,16 @@ class Builder < Formula
 
   on_linux do
     if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_linux_x86_64.tar.gz"
-      sha256 "086d2c782ed346942cee0b786b780d27a8e0aa752c19f442352ee3b9a3d398f9"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.28/builder_linux_x86_64.tar.gz"
+      sha256 "64505cbd2714f7a8dff8d37c17780da1e028b0c32ba7c614b4fc5b0cf4cf25aa"
 
       def install
         bin.install "builder"
       end
     end
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.27/builder_linux_arm64.tar.gz"
-      sha256 "38ecad6fb0b39e41155425523a207d7dfafb23a1713cd03dc920567e5d8141bd"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.28/builder_linux_arm64.tar.gz"
+      sha256 "a5f1da1c118ffb3bc5d344d1d412847361ac03b802a1fbb998767bd8f817ab92"
 
       def install
         bin.install "builder"
