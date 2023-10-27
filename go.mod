@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/adrg/frontmatter v0.2.0
 	github.com/alecthomas/kong v0.8.0
-	github.com/bmatcuk/doublestar/v4 v4.6.0
+	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/djherbis/times v1.5.0
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/gorilla/feeds v1.1.1
