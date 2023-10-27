@@ -16,6 +16,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/gorilla/feeds"
 	"github.com/gosimple/slug"
+	"github.com/microcosm-cc/bluemonday"
 	cp "github.com/otiai10/copy"
 	"github.com/sabloger/sitemap-generator/smg"
 	"github.com/tdewolff/minify"
@@ -153,9 +154,9 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 	now := time.Now().UTC()
 
 	feed := &feeds.Feed{
-		Title:       "",
+		Title:       r.baseURL,
 		Link:        &feeds.Link{Href: r.baseURL},
-		Description: "",
+		Description: fmt.Sprintf("feed for %s", r.baseURL),
 		Created:     now,
 	}
 
@@ -164,6 +165,8 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 	sitemap.SetLastMod(&now)
 	sitemap.SetCompress(false)
 	sitemap.SetHostname(r.baseURL)
+
+	sanitizer := bluemonday.UGCPolicy()
 
 	for _, doc := range docs {
 		modifiedTime := doc.Timespec.ModTime().UTC()
@@ -187,6 +190,7 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 		contents, _ := r.renderMarkdownFromDoc(doc, funcMap)
 
 		feed.Items = append(feed.Items, &feeds.Item{
+			Id:    docURL,
 			Title: doc.Title(),
 			Link: &feeds.Link{
 				Href: docURL,
@@ -194,7 +198,7 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 			Description: doc.Description(),
 			Updated:     modifiedTime,
 			Created:     createdTime,
-			Content:     contents,
+			Content:     sanitizer.Sanitize(contents),
 		})
 	}
 
