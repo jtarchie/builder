@@ -343,8 +343,11 @@ func writeHTMLFiles(filenames []string, contents string) error {
 	}
 
 	writer := &strings.Builder{}
+	minifier := &mHTML.Minifier{
+		KeepDocumentTags: true,
+	}
 
-	err = mHTML.Minify(&minify.M{}, writer, strings.NewReader(contents), nil)
+	err = minifier.Minify(&minify.M{}, writer, strings.NewReader(contents), nil)
 	if err != nil {
 		return fmt.Errorf("could not minify: %w", err)
 	}
