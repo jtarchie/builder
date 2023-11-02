@@ -5,20 +5,20 @@
 class Builder < Formula
   desc ""
   homepage ""
-  version "0.0.29"
+  version "0.0.30"
 
   on_macos do
-    if Hardware::CPU.arm?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.29/builder_darwin_arm64.tar.gz"
-      sha256 "5b60434afab84e4006d2856d71763e43b98e00efae38bcedbf19ec18d4e68566"
+    if Hardware::CPU.intel?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.30/builder_darwin_x86_64.tar.gz"
+      sha256 "0bcda9f265d089e2a6a85a34ddadf4baa6ee3b5a993fa116105ac9df94b5c0d5"
 
       def install
         bin.install "builder"
       end
     end
-    if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.29/builder_darwin_x86_64.tar.gz"
-      sha256 "69a798955ffb08a0c7a5d8a3716a84b141d23d9a8f72ed090250dbeeb145029e"
+    if Hardware::CPU.arm?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.30/builder_darwin_arm64.tar.gz"
+      sha256 "c8f3b01224569ea6e7e95466bdaa0baccf4365ddcde03b7d6d6e91a2cb117b2a"
 
       def install
         bin.install "builder"
@@ -27,17 +27,17 @@ class Builder < Formula
   end
 
   on_linux do
-    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.29/builder_linux_arm64.tar.gz"
-      sha256 "5d65b90b15816b6f5784de9d5ca73188424f637aca50a84c3868a66374dccdc9"
+    if Hardware::CPU.intel?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.30/builder_linux_x86_64.tar.gz"
+      sha256 "221509586f4646066edc38cada28f7a6dc7afca944f171aff42753db419d0a91"
 
       def install
         bin.install "builder"
       end
     end
-    if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.29/builder_linux_x86_64.tar.gz"
-      sha256 "c8c38a4bd532ee487f469d3529b7c372c29a3455829452789bb66c6473a3a8ee"
+    if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.30/builder_linux_arm64.tar.gz"
+      sha256 "7eb32c1200dd0ef8ab9f4dbbe4261e0cbd11a57e49b2e6c6249b42358e56a982"
 
       def install
         bin.install "builder"
