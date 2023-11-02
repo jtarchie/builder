@@ -12,12 +12,13 @@ import (
 )
 
 type CLI struct {
+	AssetsPath     string `help:"path to static assets (default with be source-path/public)"`
+	BaseURL        string `help:"the URL which the contents will be served from, this is only used for generating feeds"`
 	BuildPath      string `help:"where generated content should go"                                                      required:""                  type:"path"`
+	FeedGlob       string `help:"glob patterns for documents to feature in feeds"`
 	LayoutFilename string `default:"layout.html"                                                                         help:"layout file to render" required:""`
 	Serve          bool   `help:"serve when done building"`
 	SourcePath     string `help:"source of all files"                                                                    required:""                  type:"path"`
-	AssetsPath     string `help:"path to static assets (default with be source-path/public)"`
-	BaseURL        string `help:"the URL which the contents will be served from, this is only used for generating feeds"`
 }
 
 func (c *CLI) Run() error {
@@ -35,7 +36,16 @@ func (c *CLI) Run() error {
 
 	markdownGlob := filepath.Join(c.SourcePath, "**", "*.md")
 
-	err := renderer.Execute(markdownGlob)
+	if c.FeedGlob == "" {
+		c.FeedGlob = markdownGlob
+	} else {
+		c.FeedGlob = filepath.Join(c.SourcePath, c.FeedGlob)
+	}
+
+	err := renderer.Execute(
+		markdownGlob,
+		c.FeedGlob,
+	)
 	if err != nil {
 		return fmt.Errorf("could not execute render: %w", err)
 	}
@@ -43,7 +53,7 @@ func (c *CLI) Run() error {
 	if c.Serve {
 		watcher := NewWatcher(c.SourcePath)
 
-		go c.startWatcher(watcher, renderer, markdownGlob)
+		go c.startWatcher(watcher, renderer, markdownGlob, c.FeedGlob)
 
 		e := echo.New()
 		e.Use(middleware.Logger())
@@ -62,6 +72,7 @@ func (c *CLI) startWatcher(
 	watcher *Watcher,
 	renderer *Render,
 	markdownGlob string,
+	feedGlob string,
 ) {
 	allGlob := filepath.Join(c.SourcePath, "**", "{*.md,*.html,*.js,*.css}")
 
@@ -71,7 +82,10 @@ func (c *CLI) startWatcher(
 		if matched {
 			slog.Info("rebuilding markdown files", slog.String("filename", filename))
 
-			err := renderer.Execute(markdownGlob)
+			err := renderer.Execute(
+				markdownGlob,
+				feedGlob,
+			)
 			if err != nil {
 				slog.Error("could not rebuild markdown files", slog.String("error", err.Error()))
 			}

@@ -289,5 +289,29 @@ title: required
 			Expect(contents).To(gbytes.Say(`https://example.com/other.html`))
 			Expect(contents).To(gbytes.Say(`https://example.com/dir/index.html`))
 		})
+
+		It("creates feeds for a certain glob", func() {
+			createLayout()
+			createFile("dir/index.md", "# some text")
+			createFile("other.md", "# some text")
+			createFile("dir/test.html", "some other text")
+
+			cli.BaseURL = "https://example.com"
+			cli.FeedGlob = "dir/**/*.md"
+			err := cli.Run()
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := string(readFile("rss.xml").Contents())
+			Expect(contents).ToNot(ContainSubstring(`https://example.com/other.html`))
+			Expect(contents).To(ContainSubstring(`https://example.com/dir/index.html`))
+
+			contents = string(readFile("atom.xml").Contents())
+			Expect(contents).ToNot(ContainSubstring(`https://example.com/other.html`))
+			Expect(contents).To(ContainSubstring(`https://example.com/dir/index.html`))
+
+			contents = string(readFile("sitemap.xml").Contents())
+			Expect(contents).ToNot(ContainSubstring(`https://example.com/other.html`))
+			Expect(contents).To(ContainSubstring(`https://example.com/dir/index.html`))
+		})
 	})
 })

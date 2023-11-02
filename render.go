@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/sprig/v3"
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gorilla/feeds"
 	"github.com/gosimple/slug"
 	"github.com/microcosm-cc/bluemonday"
@@ -83,13 +84,16 @@ func NewRender(
 }
 
 //nolint:funlen,cyclop
-func (r *Render) Execute(pattern string) error {
+func (r *Render) Execute(
+	docsGlob string,
+	feedGlob string,
+) error {
 	err := r.copyAssets()
 	if err != nil {
 		return fmt.Errorf("copying assets issue: %w", err)
 	}
 
-	docs, err := NewDocs(r.sourcePath, pattern, 0, false)
+	docs, err := NewDocs(r.sourcePath, docsGlob, 0, false)
 	if err != nil {
 		return fmt.Errorf("could not glob markdown files: %w", err)
 	}
@@ -134,23 +138,31 @@ func (r *Render) Execute(pattern string) error {
 		})
 	}
 
+	if r.baseURL != "" {
+		group.Go(func() error {
+			err = r.generateFeeds(docs, feedGlob, funcMap)
+			if err != nil {
+				return fmt.Errorf("could not render feeds: %w", err)
+			}
+
+			return nil
+		})
+	}
+
 	err = group.Wait()
 	if err != nil {
 		return fmt.Errorf("could not render: %w", err)
-	}
-
-	if r.baseURL != "" {
-		err = r.generateFeeds(docs, funcMap)
-		if err != nil {
-			return fmt.Errorf("could not render feeds: %w", err)
-		}
 	}
 
 	return nil
 }
 
 //nolint:funlen
-func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
+func (r *Render) generateFeeds(
+	docs Docs,
+	feedGlob string,
+	funcMap template.FuncMap,
+) error {
 	now := time.Now().UTC()
 
 	feed := &feeds.Feed{
@@ -169,6 +181,10 @@ func (r *Render) generateFeeds(docs Docs, funcMap template.FuncMap) error {
 	sanitizer := bluemonday.UGCPolicy()
 
 	for _, doc := range docs {
+		if matched, _ := doublestar.Match(feedGlob, doc.Filename()); !matched {
+			continue
+		}
+
 		modifiedTime := doc.Timespec.ModTime().UTC()
 		createdTime := modifiedTime
 
