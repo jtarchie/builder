@@ -11,7 +11,7 @@ require (
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/djherbis/times v1.6.0
 	github.com/fsnotify/fsnotify v1.7.0
-	github.com/gorilla/feeds v1.1.1
+	github.com/gorilla/feeds v1.1.2
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.11.2
 	github.com/microcosm-cc/bluemonday v1.0.26
