@@ -2,9 +2,9 @@ package builder_test
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/jtarchie/builder"
 	. "github.com/onsi/ginkgo/v2"
@@ -82,7 +82,7 @@ var _ = Describe("Watcher", func() {
 			for i := 0; i < 10; i++ {
 				expectedFilename := filepath.Join(sourceDir, "file")
 
-				err = os.WriteFile(expectedFilename, []byte(fmt.Sprintf("%d", i)), os.ModePerm)
+				err = os.WriteFile(expectedFilename, []byte(strconv.Itoa(i)), os.ModePerm)
 				Expect(err).NotTo(HaveOccurred())
 			}
 

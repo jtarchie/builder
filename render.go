@@ -6,11 +6,11 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"html/template"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"text/template"
 	"time"
 
 	"github.com/Masterminds/sprig/v3"
@@ -317,8 +317,8 @@ func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layout *temp
 
 	err = layout.Execute(layoutWriter, map[string]any{
 		"Doc": doc,
-		//nolint: gosec
-		"RenderedPage": template.HTML(renderedMarkdown),
+
+		"RenderedPage": renderedMarkdown,
 	})
 	if err != nil {
 		return fmt.Errorf("could not render layout template (%s): %w", doc.Filename(), err)
