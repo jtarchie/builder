@@ -18,7 +18,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.14.0
 	github.com/onsi/gomega v1.30.0
 	github.com/otiai10/copy v1.14.0
-	github.com/sabloger/sitemap-generator v1.2.2
+	github.com/sabloger/sitemap-generator v1.3.0
 	github.com/samber/lo v1.39.0
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/yuin/goldmark v1.6.0
