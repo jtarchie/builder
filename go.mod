@@ -15,7 +15,7 @@ require (
 	github.com/gosimple/slug v1.13.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/microcosm-cc/bluemonday v1.0.26
-	github.com/onsi/ginkgo/v2 v2.14.0
+	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.30.0
 	github.com/otiai10/copy v1.14.0
 	github.com/sabloger/sitemap-generator v1.2.2
