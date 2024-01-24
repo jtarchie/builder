@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/Masterminds/sprig/v3"
+	chromahtml "github.com/alecthomas/chroma/formatters/html"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/gorilla/feeds"
 	"github.com/gosimple/slug"
@@ -66,7 +67,12 @@ func NewRender(
 				extension.GFM,
 				emoji.Emoji,
 				&mermaid.Extender{},
-				highlighting.Highlighting,
+				highlighting.NewHighlighting(
+					highlighting.WithFormatOptions(
+						chromahtml.WithClasses(true),
+						chromahtml.WithLineNumbers(false),
+					),
+				),
 				extension.DefinitionList,
 				extension.Footnote,
 				extension.Typographer,
