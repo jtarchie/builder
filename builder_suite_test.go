@@ -53,6 +53,9 @@ var _ = Describe("Builder", func() {
 				</head>
 				<body>
 				{{.RenderedPage}}
+
+				{{range $doc := iterDocs "posts/" 3}}
+				{{end}}
 				</body>
 			</html>
 		`)

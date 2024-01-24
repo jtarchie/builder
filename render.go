@@ -20,7 +20,6 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	cp "github.com/otiai10/copy"
 	"github.com/sabloger/sitemap-generator/smg"
-	"github.com/samber/lo"
 	"github.com/tdewolff/minify"
 	mHTML "github.com/tdewolff/minify/html"
 	"github.com/yuin/goldmark"
@@ -104,11 +103,6 @@ func (r *Render) Execute(
 		return fmt.Errorf("could not read layout: %w", err)
 	}
 
-	layout, err := template.New(r.layoutPath).Parse(contents)
-	if err != nil {
-		return fmt.Errorf("could not parse layout template (%s): %w", r.layoutPath, err)
-	}
-
 	funcMap := template.FuncMap{
 		"iterDocs": func(path string, limit int) (Docs, error) {
 			pattern := filepath.Join(r.sourcePath, path, "*.md")
@@ -119,6 +113,15 @@ func (r *Render) Execute(
 
 			return docs, nil
 		},
+	}
+
+	layout, err := template.
+		New(r.layoutPath).
+		Funcs(funcMap).
+		Funcs(sprig.FuncMap()).
+		Parse(contents)
+	if err != nil {
+		return fmt.Errorf("could not parse layout template (%s): %w", r.layoutPath, err)
 	}
 
 	maxRenders := 10
@@ -316,12 +319,12 @@ func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layout *temp
 
 	layoutWriter := &bytes.Buffer{}
 
-	err = layout.Execute(layoutWriter, lo.Assign(
-		funcMap,
+	err = layout.Execute(layoutWriter,
 		map[string]any{
 			"Doc":          doc,
 			"RenderedPage": renderedMarkdown,
-		}))
+		},
+	)
 	if err != nil {
 		return fmt.Errorf("could not render layout template (%s): %w", doc.Filename(), err)
 	}
