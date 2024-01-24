@@ -5,20 +5,20 @@
 class Builder < Formula
   desc ""
   homepage ""
-  version "0.0.32"
+  version "0.0.33"
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.32/builder_darwin_arm64.tar.gz"
-      sha256 "c3dd93225d3b0d173148be4f20f776f77229c57215092c31681f5f34ea982f47"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.33/builder_darwin_arm64.tar.gz"
+      sha256 "505e29918f8ff54627f868b427d33b222f6f5396c45201a6febeccd0bc2bfb26"
 
       def install
         bin.install "builder"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.32/builder_darwin_x86_64.tar.gz"
-      sha256 "029e2621df8f997bc1fabb2acff0029cad9790123663703e83b7f9b137db52fd"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.33/builder_darwin_x86_64.tar.gz"
+      sha256 "297236b109acf959a7711e8244ef80f6e730ade7795e6f8a06be6d0ff1784a89"
 
       def install
         bin.install "builder"
@@ -28,16 +28,16 @@ class Builder < Formula
 
   on_linux do
     if Hardware::CPU.arm? && Hardware::CPU.is_64_bit?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.32/builder_linux_arm64.tar.gz"
-      sha256 "cc4375822573d6bf8c7baf70f2f1672e5ca74f8043b1b7ff427ba87bc0ec2b68"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.33/builder_linux_arm64.tar.gz"
+      sha256 "606537af44656e5c4f52febed66329e68e3bfdc617f56697b6c82812c3af7def"
 
       def install
         bin.install "builder"
       end
     end
     if Hardware::CPU.intel?
-      url "https://github.com/jtarchie/builder/releases/download/v0.0.32/builder_linux_x86_64.tar.gz"
-      sha256 "5ae90b2c986d7d65ae264299806f27ab6baffd70061ffa771587f1d2030415d8"
+      url "https://github.com/jtarchie/builder/releases/download/v0.0.33/builder_linux_x86_64.tar.gz"
+      sha256 "aeeac80278582f739a801c731a4a6479c722b687b58bc181ed5fdfc5bf14a66c"
 
       def install
         bin.install "builder"
