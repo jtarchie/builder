@@ -20,6 +20,7 @@ import (
 	"github.com/microcosm-cc/bluemonday"
 	cp "github.com/otiai10/copy"
 	"github.com/sabloger/sitemap-generator/smg"
+	"github.com/samber/lo"
 	"github.com/tdewolff/minify"
 	mHTML "github.com/tdewolff/minify/html"
 	"github.com/yuin/goldmark"
@@ -315,11 +316,12 @@ func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layout *temp
 
 	layoutWriter := &bytes.Buffer{}
 
-	err = layout.Execute(layoutWriter, map[string]any{
-		"Doc": doc,
-
-		"RenderedPage": renderedMarkdown,
-	})
+	err = layout.Execute(layoutWriter, lo.Assign(
+		funcMap,
+		map[string]any{
+			"Doc":          doc,
+			"RenderedPage": renderedMarkdown,
+		}))
 	if err != nil {
 		return fmt.Errorf("could not render layout template (%s): %w", doc.Filename(), err)
 	}
