@@ -7,7 +7,7 @@ tasks:
     - gofmt -w .
   lint: golangci-lint run --fix --timeout "10m"
   test: go run github.com/onsi/ginkgo/v2/ginkgo -cover -race -r -p
-  example: go run ./... --source-path example/ --build-path ./build --base-url https://example.com --serve
+  example: go run ./... --source-path example/ --build-path ./build --base-url https://example.com
   default:
     cmds:
     - task: format
