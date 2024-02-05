@@ -7,6 +7,7 @@ toolchain go1.21.3
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/adrg/frontmatter v0.2.0
+	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/kong v0.8.1
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/djherbis/times v1.6.0
@@ -21,7 +22,7 @@ require (
 	github.com/sabloger/sitemap-generator v1.3.0
 	github.com/samber/lo v1.39.0
 	github.com/tdewolff/minify v2.3.6+incompatible
-	github.com/yuin/goldmark v1.6.0
+	github.com/yuin/goldmark v1.7.0
 	github.com/yuin/goldmark-emoji v1.0.2
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	go.abhg.dev/goldmark/anchor v0.1.1
@@ -34,8 +35,8 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
-	github.com/alecthomas/chroma v0.10.0 // indirect
-	github.com/alecthomas/chroma/v2 v2.12.0 // indirect
+	github.com/alecthomas/assert/v2 v2.2.1 // indirect
+	github.com/alecthomas/repr v0.2.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/dlclark/regexp2 v1.10.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
