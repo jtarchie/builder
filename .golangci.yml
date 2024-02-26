@@ -9,6 +9,7 @@ linters:
   - gomoddirectives
   - lll
   - revive
+  - perfsprint
 
   # linters deprecated
   - deadcode
