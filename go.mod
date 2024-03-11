@@ -8,7 +8,7 @@ require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/adrg/frontmatter v0.2.0
 	github.com/alecthomas/chroma v0.10.0
-	github.com/alecthomas/kong v0.8.1
+	github.com/alecthomas/kong v0.9.0
 	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/djherbis/times v1.6.0
 	github.com/fsnotify/fsnotify v1.7.0
@@ -35,8 +35,6 @@ require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.2.1 // indirect
-	github.com/alecthomas/assert/v2 v2.2.1 // indirect
-	github.com/alecthomas/repr v0.2.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
