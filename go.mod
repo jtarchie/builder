@@ -22,7 +22,7 @@ require (
 	github.com/sabloger/sitemap-generator v1.3.0
 	github.com/samber/lo v1.39.0
 	github.com/tdewolff/minify v2.3.6+incompatible
-	github.com/yuin/goldmark v1.7.0
+	github.com/yuin/goldmark v1.7.1
 	github.com/yuin/goldmark-emoji v1.0.2
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	go.abhg.dev/goldmark/anchor v0.1.1
