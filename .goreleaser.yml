@@ -1,3 +1,4 @@
+version: 2
 project_name: builder
 
 release:
@@ -43,15 +44,12 @@ archives:
     builds_info:
       group: root
       owner: root
-    rlcp: true
     files:
       - README.md
       - LICENSE.md
 
 brews:
-- tap:
-    owner: jtarchie
-    name: builder
+- name: builder
   test: |
     system "#{bin}/builder --help"
   install:
@@ -59,4 +57,4 @@ brews:
 checksum:
   name_template: 'checksums.txt'
 changelog:
-  skip: true
+  disable: true
