@@ -15,8 +15,16 @@ embrace a more straightforward approach to building your website.
   - **Feeds**: Outputs RSS, Atom, and Sitemap feeds based on the content.
 
     ```html
-    <link rel="alternate" type="application/rss+xml" href="https://example.com/rss.xml" />
-    <link rel="alternate" type="application/atom+xml" href="https://example.com/atom.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      href="https://example.com/rss.xml"
+    />
+    <link
+      rel="alternate"
+      type="application/atom+xml"
+      href="https://example.com/atom.xml"
+    />
     ```
 
   - **GitHub Flavored Markdown**: Write markdown the GitHub way.
