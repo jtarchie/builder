@@ -7,6 +7,7 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/samber/lo"
+	"github.com/samber/lo/mutable"
 )
 
 type Docs []*Doc
@@ -29,7 +30,7 @@ func NewDocs(
 	}
 
 	sort.Strings(matches)
-	matches = lo.Reverse(matches)
+	mutable.Reverse(matches)
 
 	if limit > 0 && len(matches) > limit {
 		matches = matches[:limit]
