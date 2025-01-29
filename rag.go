@@ -4,23 +4,39 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/philippgille/chromem-go"
 	"github.com/sashabaranov/go-openai"
 )
 
+type OpenAIConfig struct {
+	EmbedModel string
+	Endpoint   string
+	LLMModel   string
+	Token      string
+}
+
 type RAG struct {
 	db *chromem.DB
 
-	embedModel    string
-	endpoint      string
-	llmModel      string
-	token         string
+	config        OpenAIConfig
 	embeddingFunc chromem.EmbeddingFunc
 }
 
-func NewRAG(filename string, embedModel string, llmModel string, endpoint string, token string) (*RAG, error) {
+func NewRAG(filename string, config *OpenAIConfig) (*RAG, error) {
+	if config == nil {
+		config = &OpenAIConfig{
+			// https://platform.openai.com/docs/guides/embeddings#embedding-models
+			EmbedModel: "text-embedding-3-small",
+			Endpoint:   "https://api.openai.com/v1",
+			// https://platform.openai.com/docs/model
+			LLMModel: "gpt-4o-mini",
+			Token:    os.Getenv("OPENAI_API_KEY"),
+		}
+	}
+
 	db := chromem.NewDB()
 
 	if filename != ":memory:" {
@@ -35,11 +51,8 @@ func NewRAG(filename string, embedModel string, llmModel string, endpoint string
 	return &RAG{
 		db: db,
 
-		embedModel:    embedModel,
-		endpoint:      endpoint,
-		llmModel:      llmModel,
-		token:         token,
-		embeddingFunc: chromem.NewEmbeddingFuncOpenAICompat(endpoint, token, embedModel, nil),
+		config:        *config,
+		embeddingFunc: chromem.NewEmbeddingFuncOpenAICompat(config.Endpoint, config.Token, config.EmbedModel, nil),
 	}, nil
 }
 
@@ -89,8 +102,8 @@ func (r *RAG) Ask(query string) (string, error) {
 		return "", fmt.Errorf("failed to search: %w", err)
 	}
 
-	config := openai.DefaultConfig(r.token)
-	config.BaseURL = r.endpoint
+	config := openai.DefaultConfig(r.config.Token)
+	config.BaseURL = r.config.Endpoint
 	client := openai.NewClientWithConfig(config)
 
 	userPrompt := "Query: " + query + "\n\nDocuments:\n\n"
@@ -103,7 +116,7 @@ func (r *RAG) Ask(query string) (string, error) {
 	response, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
-			Model: r.llmModel,
+			Model: r.config.LLMModel,
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    "system",

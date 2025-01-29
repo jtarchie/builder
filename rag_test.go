@@ -72,7 +72,13 @@ The Internet has transformed:
 
 var _ = FDescribe("RAG", func() {
 	It("adds documents", func() {
-		rag, err := builder.NewRAG(":memory:", "nomic-embed-text", "llama3.2", "http://localhost:11434/v1", "")
+		config := &builder.OpenAIConfig{
+			EmbedModel: "nomic-embed-text",
+			Endpoint:   "http://localhost:11434/v1",
+			LLMModel:   "llama3.2",
+			Token:      "",
+		}
+		rag, err := builder.NewRAG(":memory:", config)
 		Expect(err).NotTo(HaveOccurred())
 
 		for index, doc := range []string{doc1, doc2, doc3} {
@@ -86,6 +92,6 @@ var _ = FDescribe("RAG", func() {
 
 		answer, err := rag.Ask("What is the largest planet?")
 		Expect(err).NotTo(HaveOccurred())
-		fmt.Println(answer)
+		fmt.Println("answer:" + answer)
 	})
 })
