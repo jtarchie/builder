@@ -9,7 +9,7 @@ require (
 	github.com/adrg/frontmatter v0.2.0
 	github.com/alecthomas/chroma v0.10.0
 	github.com/alecthomas/kong v1.6.1
-	github.com/bmatcuk/doublestar/v4 v4.8.0
+	github.com/bmatcuk/doublestar/v4 v4.8.1
 	github.com/djherbis/times v1.6.0
 	github.com/fsnotify/fsnotify v1.8.0
 	github.com/gorilla/feeds v1.2.0
@@ -21,7 +21,7 @@ require (
 	github.com/otiai10/copy v1.14.1
 	github.com/philippgille/chromem-go v0.7.0
 	github.com/sabloger/sitemap-generator v1.3.0
-	github.com/samber/lo v1.47.0
+	github.com/samber/lo v1.49.1
 	github.com/sashabaranov/go-openai v1.36.1
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/yuin/goldmark v1.7.8
@@ -43,7 +43,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/google/pprof v0.0.0-20250121033306-997b0b79cac0 // indirect
+	github.com/google/pprof v0.0.0-20250128161936-077ca0a936bf // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/css v1.0.1 // indirect
 	github.com/gosimple/unidecode v1.0.1 // indirect
