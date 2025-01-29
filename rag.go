@@ -2,6 +2,7 @@ package builder
 
 import (
 	"context"
+	_ "embed"
 	"fmt"
 	"time"
 
@@ -79,6 +80,9 @@ func (r *RAG) Search(query string) ([]chromem.Result, error) {
 	return results, nil
 }
 
+//go:embed rag/system.md
+var systemPrompt string
+
 func (r *RAG) Ask(query string) (string, error) {
 	results, err := r.Search(query)
 	if err != nil {
@@ -94,30 +98,16 @@ func (r *RAG) Ask(query string) (string, error) {
 		userPrompt += fmt.Sprintf("- ID: %s\n```markdown\n%s\n```\n", result.ID, result.Content)
 	}
 
+	fmt.Println(userPrompt)
+
 	response, err := client.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
 			Model: r.llmModel,
 			Messages: []openai.ChatCompletionMessage{
 				{
-					Role: "system",
-					Content: `
-**System Prompt:**  
-
-You are an AI assistant designed to retrieve and provide answers based on specific documents. Your responses should be concise, relevant, and strictly derived from the provided documents.
-
-### Instructions:  
-- The user will submit a query, and you must respond with the most relevant information from the available documents.
-- If the user specifies a document ID, prioritize retrieving information from that document.
-- Do **not** generate information beyond what is present in the documents. If no relevant information is found, state that explicitly.
-- Annotate each response with the source document ID or title to indicate where the information was retrieved from.
-- The documents are structured in markdown format.
-
-### Constraints:  
-- Do **not** fabricate or assume information.
-- Do **not** provide general knowledge responses—limit answers strictly to the documents.
-- If multiple sources are relevant, summarize while maintaining accuracy and provide citations.
-					`,
+					Role:    "system",
+					Content: systemPrompt,
 				},
 				{
 					Role:    "user",
