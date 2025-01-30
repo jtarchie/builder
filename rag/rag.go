@@ -1,4 +1,4 @@
-package builder
+package rag
 
 import (
 	"context"
@@ -25,7 +25,7 @@ type RAG struct {
 	embeddingFunc chromem.EmbeddingFunc
 }
 
-func NewRAG(filename string, config *OpenAIConfig) (*RAG, error) {
+func New(filename string, config *OpenAIConfig) (*RAG, error) {
 	if config == nil {
 		config = &OpenAIConfig{
 			// https://platform.openai.com/docs/guides/embeddings#embedding-models
@@ -93,7 +93,7 @@ func (r *RAG) Search(query string) ([]chromem.Result, error) {
 	return results, nil
 }
 
-//go:embed rag/system.md
+//go:embed system.md
 var systemPrompt string
 
 func (r *RAG) Ask(query string) (string, error) {

@@ -1,12 +1,11 @@
-//go:build rag
-
-package builder_test
+package rag_test
 
 import (
 	"fmt"
+	"testing"
 
-	"github.com/jtarchie/builder"
-	. "github.com/onsi/ginkgo/v2"
+	"github.com/jtarchie/builder/rag"
+	"github.com/onsi/gomega"
 	. "github.com/onsi/gomega"
 )
 
@@ -70,28 +69,28 @@ The Internet has transformed:
 - Education (e-learning, online courses)
 `
 
-var _ = FDescribe("RAG", func() {
-	It("adds documents", func() {
-		config := &builder.OpenAIConfig{
-			EmbedModel: "nomic-embed-text",
-			Endpoint:   "http://localhost:11434/v1",
-			LLMModel:   "llama3.2",
-			Token:      "",
-		}
-		rag, err := builder.NewRAG(":memory:", config)
-		Expect(err).NotTo(HaveOccurred())
+func TestRAG(t *testing.T) {
+	assert := gomega.NewWithT(t)
 
-		for index, doc := range []string{doc1, doc2, doc3} {
-			err = rag.AddDocument(fmt.Sprintf("id-%d", index), doc)
-			Expect(err).NotTo(HaveOccurred())
-		}
+	config := &rag.OpenAIConfig{
+		EmbedModel: "nomic-embed-text",
+		Endpoint:   "http://localhost:11434/v1",
+		LLMModel:   "llama3.2",
+		Token:      "",
+	}
+	rag, err := rag.New(":memory:", config)
+	assert.Expect(err).NotTo(HaveOccurred())
 
-		results, err := rag.Search("machine learning")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(results).To(HaveLen(1))
+	for index, doc := range []string{doc1, doc2, doc3} {
+		err = rag.AddDocument(fmt.Sprintf("id-%d", index), doc)
+		assert.Expect(err).NotTo(HaveOccurred())
+	}
 
-		answer, err := rag.Ask("What is the largest planet?")
-		Expect(err).NotTo(HaveOccurred())
-		fmt.Println("answer:" + answer)
-	})
-})
+	results, err := rag.Search("machine learning")
+	assert.Expect(err).NotTo(HaveOccurred())
+	assert.Expect(results).To(HaveLen(1))
+
+	answer, err := rag.Ask("What is the largest planet?")
+	assert.Expect(err).NotTo(HaveOccurred())
+	fmt.Println("answer:" + answer)
+}

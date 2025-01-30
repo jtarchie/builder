@@ -6,7 +6,7 @@ tasks:
     - deno fmt README.md
     - gofmt -w .
   lint: golangci-lint run --fix --timeout "10m"
-  test: go run github.com/onsi/ginkgo/v2/ginkgo -cover -race -r -p
+  test: go test github.com/jtarchie/builder -race
   example: go run ./... --source-path example/ --build-path ./build --base-url https://example.com
   default:
     cmds:

@@ -148,20 +148,16 @@ func (r *Render) Execute(
 		})
 	}
 
-	if r.baseURL != "" {
-		group.Go(func() error {
-			err = r.generateFeeds(docs, feedGlob, funcMap)
-			if err != nil {
-				return fmt.Errorf("could not render feeds: %w", err)
-			}
-
-			return nil
-		})
-	}
-
 	err = group.Wait()
 	if err != nil {
 		return fmt.Errorf("could not render: %w", err)
+	}
+
+	if r.baseURL != "" {
+		err = r.generateFeeds(docs, feedGlob, funcMap)
+		if err != nil {
+			return fmt.Errorf("could not render feeds: %w", err)
+		}
 	}
 
 	return nil
