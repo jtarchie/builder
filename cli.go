@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"path/filepath"
 
+	"errors"
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -51,6 +52,8 @@ func (c *CLI) Run() error {
 	}
 
 	if c.Serve {
+		slog.Info("starting server", "sourcePath", c.SourcePath, "buildPath", c.BuildPath)
+
 		watcher := NewWatcher(c.SourcePath)
 
 		go c.startWatcher(watcher, renderer, markdownGlob, c.FeedGlob)
@@ -78,7 +81,12 @@ func (c *CLI) startWatcher(
 	slog.Info("globbing all files", slog.String("glob", allGlob))
 
 	err := watcher.Execute(func(filename string) error {
-		matched, _ := doublestar.Match(allGlob, filename)
+		slog.Info("file changed", slog.String("filename", filename))
+
+		matched, err := doublestar.Match(allGlob, filename)
+		if errors.Is(err, doublestar.ErrBadPattern) {
+			return fmt.Errorf("could not use glob pattern: %w", err)
+		}
 
 		if matched {
 			slog.Info("rebuilding markdown files", slog.String("filename", filename))
