@@ -22,6 +22,10 @@ var _ = Describe("Watcher", func() {
 			sourceDir, err := os.MkdirTemp("", "")
 			Expect(err).NotTo(HaveOccurred())
 
+			subDir := filepath.Join(sourceDir, "subdir")
+			err = os.MkdirAll(subDir, os.ModePerm)
+			Expect(err).NotTo(HaveOccurred())
+
 			watcher := builder.NewWatcher(sourceDir)
 
 			go func() {
@@ -38,6 +42,13 @@ var _ = Describe("Watcher", func() {
 			Consistently(foundFilename.Load).Should(Equal(""))
 
 			expectedFilename := filepath.Join(sourceDir, "file")
+
+			err = os.WriteFile(expectedFilename, []byte(""), os.ModePerm)
+			Expect(err).NotTo(HaveOccurred())
+
+			Eventually(foundFilename.Load).Should(Equal(expectedFilename))
+
+			expectedFilename = filepath.Join(subDir, "file")
 
 			err = os.WriteFile(expectedFilename, []byte(""), os.ModePerm)
 			Expect(err).NotTo(HaveOccurred())

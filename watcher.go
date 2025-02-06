@@ -2,6 +2,8 @@ package builder
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 )
@@ -25,9 +27,20 @@ func (w *Watcher) Execute(watchFn func(string) error) error {
 	}
 	defer watcher.Close()
 
-	err = watcher.Add(w.sourceDir)
+	err = filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() && info.Name()[0] != '.' {
+			err = watcher.Add(path)
+			if err != nil {
+				return fmt.Errorf("could not add watching path %s: %w", path, err)
+			}
+		}
+		return nil
+	})
 	if err != nil {
-		return fmt.Errorf("could add watching path: %w", err)
+		return fmt.Errorf("could not walk through source directory: %w", err)
 	}
 
 	for event := range watcher.Events {
