@@ -75,6 +75,7 @@ func (c *CLI) startWatcher(
 	feedGlob string,
 ) {
 	allGlob := filepath.Join(c.SourcePath, "**", "{*.md,*.html,*.js,*.css}")
+	slog.Info("globbing all files", slog.String("glob", allGlob))
 
 	err := watcher.Execute(func(filename string) error {
 		matched, _ := doublestar.Match(allGlob, filename)
