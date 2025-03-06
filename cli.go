@@ -27,8 +27,13 @@ func (c *CLI) Run() error {
 		c.AssetsPath = filepath.Join(c.SourcePath, "public")
 	}
 
+	layoutPath := filepath.Join(c.SourcePath, c.LayoutFilename)
+	if filepath.IsAbs(c.LayoutFilename) {
+		layoutPath = c.LayoutFilename
+	}
+
 	renderer := NewRender(
-		filepath.Join(c.SourcePath, c.LayoutFilename),
+		layoutPath,
 		c.SourcePath,
 		c.AssetsPath,
 		c.BuildPath,

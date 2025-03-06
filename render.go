@@ -2,6 +2,9 @@ package builder
 
 import (
 	"bytes"
+	"sort"
+	"sync"
+
 	// embed file assets.
 	_ "embed"
 	"errors"
@@ -104,11 +107,6 @@ func (r *Render) Execute(
 		return fmt.Errorf("could not glob markdown files: %w", err)
 	}
 
-	contents, err := readFile(r.layoutPath)
-	if err != nil {
-		return fmt.Errorf("could not read layout: %w", err)
-	}
-
 	funcMap := template.FuncMap{
 		"iterDocs": func(path string, limit int) (Docs, error) {
 			pattern := filepath.Join(r.sourcePath, path, "*.md")
@@ -121,13 +119,32 @@ func (r *Render) Execute(
 		},
 	}
 
-	layout, err := template.
-		New(r.layoutPath).
-		Funcs(funcMap).
-		Funcs(sprig.FuncMap()).
-		Parse(contents)
+	layouts := &sync.Map{}
+	layoutFilenames, err := doublestar.FilepathGlob(r.layoutPath)
 	if err != nil {
-		return fmt.Errorf("could not parse layout template (%s): %w", r.layoutPath, err)
+		return fmt.Errorf("could not glob layout files: %w", err)
+	}
+
+	if len(layoutFilenames) == 0 {
+		return fmt.Errorf("no layout files found")
+	}
+
+	for _, layoutFilename := range layoutFilenames {
+		contents, err := os.ReadFile(layoutFilename)
+		if err != nil {
+			return fmt.Errorf("could not read layout file: %w", err)
+		}
+
+		layout, err := template.
+			New(r.layoutPath).
+			Funcs(funcMap).
+			Funcs(sprig.FuncMap()).
+			Parse(string(contents))
+		if err != nil {
+			return fmt.Errorf("could not parse layout template (%s): %w", r.layoutPath, err)
+		}
+
+		layouts.Store(layoutFilename, layout)
 	}
 
 	maxRenders := 10
@@ -139,7 +156,7 @@ func (r *Render) Execute(
 		doc := doc
 
 		group.Go(func() error {
-			err := r.renderDocument(doc, funcMap, layout)
+			err := r.renderDocument(doc, funcMap, layouts)
 			if err != nil {
 				return fmt.Errorf("rendering template issue: %w", err)
 			}
@@ -313,13 +330,36 @@ func (r *Render) renderMarkdownFromDoc(doc *Doc, funcMap template.FuncMap) (stri
 	return renderedWriter.String(), nil
 }
 
-func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layout *template.Template) error {
+func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layouts *sync.Map) error {
 	renderedMarkdown, err := r.renderMarkdownFromDoc(doc, funcMap)
 	if err != nil {
 		return fmt.Errorf("could not render markdown for doc: %w", err)
 	}
 
 	layoutWriter := &bytes.Buffer{}
+
+	layoutsByPath := []string{}
+	layouts.Range(func(key, _ interface{}) bool {
+		layoutsByPath = append(layoutsByPath, key.(string))
+		return true
+	})
+
+	sort.Slice(layoutsByPath, func(i, j int) bool {
+		return len(layoutsByPath[i]) > len(layoutsByPath[j])
+	})
+
+	useLayoutPath := layoutsByPath[len(layoutsByPath)-1]
+
+	for _, layoutPath := range layoutsByPath {
+		layoutDir := filepath.Dir(layoutPath)
+		if strings.HasPrefix(doc.Filename(), layoutDir) {
+			useLayoutPath = layoutPath
+			break
+		}
+	}
+
+	useLayout, _ := layouts.Load(useLayoutPath)
+	layout := useLayout.(*template.Template)
 
 	err = layout.Execute(layoutWriter,
 		map[string]any{
@@ -346,15 +386,6 @@ func (r *Render) renderDocument(doc *Doc, funcMap template.FuncMap, layout *temp
 	}
 
 	return nil
-}
-
-func readFile(filename string) (string, error) {
-	contents, err := os.ReadFile(filename)
-	if err != nil {
-		return "", fmt.Errorf("could not read file (%s): %w", filename, err)
-	}
-
-	return string(contents), nil
 }
 
 func writeHTMLFiles(filenames []string, contents string) error {

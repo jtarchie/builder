@@ -108,6 +108,9 @@ var _ = Describe("Builder", func() {
 		BeforeEach(func() {
 			createLayout()
 			createFile("index.md", "---\ntitle: Some Title\ndescription: Some Description\n---\nsome text")
+			createFile("posts/layout.html", `<html><title>Custom Layout</title><body>{{.RenderedPage}}</body></html>`)
+			createFile("posts/index.md", "---\ntitle: Some Post\n---\nsome text")
+			cli.LayoutFilename = "**/layout.html"
 		})
 
 		It("renders a title and description", func() {
@@ -117,6 +120,14 @@ var _ = Describe("Builder", func() {
 			contents := readFile("index.html")
 			Eventually(contents).Should(gbytes.Say("<title>Some Title</title>"))
 			Eventually(contents).Should(gbytes.Say("<description>Some Description</description>"))
+		})
+
+		It("renders with a custom layout", func() {
+			err := cli.Run()
+			Expect(err).NotTo(HaveOccurred())
+
+			contents := readFile("posts/index.html")
+			Eventually(contents).Should(gbytes.Say("<title>Custom Layout</title>"))
 		})
 	})
 
