@@ -6,7 +6,6 @@ import (
 
 	"github.com/jtarchie/builder/rag"
 	"github.com/onsi/gomega"
-	. "github.com/onsi/gomega"
 )
 
 const doc1 = `
@@ -79,18 +78,18 @@ func TestRAG(t *testing.T) {
 		Token:      "",
 	}
 	rag, err := rag.New(":memory:", config)
-	assert.Expect(err).NotTo(HaveOccurred())
+	assert.Expect(err).NotTo(gomega.HaveOccurred())
 
 	for index, doc := range []string{doc1, doc2, doc3} {
 		err = rag.AddDocument(fmt.Sprintf("id-%d", index), doc)
-		assert.Expect(err).NotTo(HaveOccurred())
+		assert.Expect(err).NotTo(gomega.HaveOccurred())
 	}
 
 	results, err := rag.Search("machine learning")
-	assert.Expect(err).NotTo(HaveOccurred())
-	assert.Expect(results).To(HaveLen(1))
+	assert.Expect(err).NotTo(gomega.HaveOccurred())
+	assert.Expect(results).To(gomega.HaveLen(1))
 
 	answer, err := rag.Ask("What is the largest planet?")
-	assert.Expect(err).NotTo(HaveOccurred())
+	assert.Expect(err).NotTo(gomega.HaveOccurred())
 	fmt.Println("answer:" + answer)
 }

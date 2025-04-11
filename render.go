@@ -211,7 +211,7 @@ func (r *Render) generateFeeds(
 		modifiedTime := doc.Timespec.ModTime().UTC()
 		createdTime := modifiedTime
 
-		if doc.Timespec.HasBirthTime() {
+		if doc.HasBirthTime() {
 			createdTime = doc.Timespec.BirthTime().UTC()
 		}
 

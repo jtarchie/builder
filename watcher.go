@@ -25,7 +25,7 @@ func (w *Watcher) Execute(watchFn func(string) error) error {
 	if err != nil {
 		return fmt.Errorf("could not create file watcher: %w", err)
 	}
-	defer watcher.Close()
+	defer func() { _ = watcher.Close() }()
 
 	err = filepath.Walk(w.sourceDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
