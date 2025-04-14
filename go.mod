@@ -24,7 +24,7 @@ require (
 	github.com/samber/lo v1.49.1
 	github.com/sashabaranov/go-openai v1.38.1
 	github.com/tdewolff/minify v2.3.6+incompatible
-	github.com/yuin/goldmark v1.7.8
+	github.com/yuin/goldmark v1.7.9
 	github.com/yuin/goldmark-emoji v1.0.5
 	github.com/yuin/goldmark-highlighting v0.0.0-20220208100518-594be1970594
 	go.abhg.dev/goldmark/anchor v0.2.0
