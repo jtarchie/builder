@@ -19,10 +19,8 @@ require (
 	github.com/onsi/ginkgo/v2 v2.23.4
 	github.com/onsi/gomega v1.37.0
 	github.com/otiai10/copy v1.14.1
-	github.com/philippgille/chromem-go v0.7.0
 	github.com/sabloger/sitemap-generator v1.3.0
 	github.com/samber/lo v1.49.1
-	github.com/sashabaranov/go-openai v1.38.1
 	github.com/tdewolff/minify v2.3.6+incompatible
 	github.com/yuin/goldmark v1.7.9
 	github.com/yuin/goldmark-emoji v1.0.5
